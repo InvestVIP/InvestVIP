@@ -84,15 +84,20 @@ async function invertir(costo) {
     } else alert("Saldo insuficiente.");
 }
 
+// MODIFICACIÓN: RESTRICCIÓN 48 HORAS
 async function procesarRetiro() {
     const monto = parseFloat(document.getElementById('withdraw-amount').value);
     const wallet = document.getElementById('withdraw-wallet').value;
     if (!wallet || monto < 5) return alert("Monto mínimo $5.");
 
+    // Consultar último retiro
     let { data: ultimaSol } = await supabaseClient.from('solicitudes').select('fecha').eq('id_telegram', userId).eq('tipo', 'retiro').order('fecha', { ascending: false }).limit(1);
+    
     if (ultimaSol?.length > 0) {
-        const diff = (new Date() - new Date(ultimaSol[0].fecha)) / (1000 * 60 * 60);
-        if (diff < 48) return alert(`⚠️ Espera 48h entre retiros. Faltan ${(48 - diff).toFixed(1)}h.`);
+        const diffHoras = (new Date() - new Date(ultimaSol[0].fecha)) / (1000 * 60 * 60);
+        if (diffHoras < 48) {
+            return alert(`⚠️ Solo puedes retirar cada 48 horas. Faltan ${(48 - diffHoras).toFixed(1)}h.`);
+        }
     }
 
     let { data: u } = await supabaseClient.from('usuarios').select('saldo_retirable').eq('id_telegram', userId).single();
@@ -102,6 +107,7 @@ async function procesarRetiro() {
     } else alert("Saldo insuficiente.");
 }
 
+// MODIFICACIÓN: ADMIN DIFERENCIADO
 async function cargarAdmin() {
     const depDiv = document.getElementById('admin-dep-list');
     const retDiv = document.getElementById('admin-ret-list');
@@ -109,14 +115,26 @@ async function cargarAdmin() {
     depDiv.innerHTML = ""; retDiv.innerHTML = ""; procDiv.innerHTML = "";
 
     let { data: pendientes } = await supabaseClient.from('solicitudes').select('*').eq('estado', 'pendiente');
+    
     pendientes?.forEach(s => {
-        const item = `<div class="admin-card-mini"><small>${s.id_telegram}</small><br><strong>$${s.monto}</strong><br><button onclick="gestionarSolicitud('${s.id}','${s.tipo}',${s.monto},'${s.id_telegram}')">APROBAR</button></div>`;
-        if(s.tipo === 'deposito') depDiv.innerHTML += item; else retDiv.innerHTML += item;
+        const esDep = s.tipo === 'deposito';
+        const item = `
+            <div class="admin-card-mini" style="border-left: 4px solid ${esDep ? '#3fb950' : '#f85149'}">
+                <span style="color:${esDep ? '#3fb950' : '#f85149'}; font-weight:bold;">${s.tipo.toUpperCase()}</span><br>
+                <small>${s.id_telegram}</small><br>
+                <strong>$${s.monto}</strong><br>
+                <button onclick="gestionarSolicitud('${s.id}','${s.tipo}',${s.monto},'${s.id_telegram}')">APROBAR</button>
+            </div>`;
+        if(esDep) depDiv.innerHTML += item; else retDiv.innerHTML += item;
     });
 
     let { data: procesados } = await supabaseClient.from('solicitudes').select('*').neq('estado', 'pendiente').order('fecha', {ascending: false}).limit(20);
     procesados?.forEach(p => {
-        procDiv.innerHTML += `<div style="border-bottom:1px solid #333; margin-bottom:5px; font-size:0.9em;">${p.tipo==='deposito'?'📥':'📤'} $${p.monto} - ${p.estado}<br><small>${p.id_telegram}</small></div>`;
+        const color = p.tipo === 'deposito' ? '#3fb950' : '#f85149';
+        procDiv.innerHTML += `<div style="border-bottom:1px solid #333; margin-bottom:5px; font-size:0.85em;">
+            <span style="color:${color}">${p.tipo==='deposito'?'📥':'📤'}</span> $${p.monto} - ${p.estado}<br>
+            <small>${p.id_telegram}</small>
+        </div>`;
     });
 }
 
