@@ -49,24 +49,28 @@
                     <div class="plan-icon">🥉</div>
                     <div class="balance-label">BRONCE</div>
                     <div class="price">$11</div>
+                    <div class="plan-stats">Diario: $0.65<br><b>Total: $39.00</b></div>
                     <button class="btn-activate">ACTIVAR</button>
                 </div>
                 <div class="miner-card silver" onclick="invertir(30, 'Plata', 1.66)">
                     <div class="plan-icon">🥈</div>
                     <div class="balance-label">PLATA</div>
                     <div class="price">$30</div>
+                    <div class="plan-stats">Diario: $1.66<br><b>Total: $99.60</b></div>
                     <button class="btn-activate">ACTIVAR</button>
                 </div>
                 <div class="miner-card gold" onclick="invertir(60, 'Oro', 3.00)">
                     <div class="plan-icon">🥇</div>
                     <div class="balance-label">ORO</div>
                     <div class="price">$60</div>
+                    <div class="plan-stats">Diario: $3.00<br><b>Total: $180.00</b></div>
                     <button class="btn-activate">ACTIVAR</button>
                 </div>
                 <div class="miner-card vip" onclick="invertir(120, 'VIP', 6.30)">
                     <div class="plan-icon">💎</div>
                     <div class="balance-label">VIP</div>
                     <div class="price">$120</div>
+                    <div class="plan-stats">Diario: $6.30<br><b>Total: $378.00</b></div>
                     <button class="btn-activate">ACTIVAR</button>
                 </div>
             </div>
@@ -78,24 +82,18 @@
             
             <div class="copy-container" onclick="copyText('0xd6fe607116c1df2b4dae56e77ffdae50cde9d153')">
                 <div class="copy-label">DIRECCIÓN USDT (BEP20)</div>
-                <div class="copy-value">0xd6fe607116c1df...d153</div>
+                <div class="copy-value">0xd6fe607116...d153</div>
                 <div class="copy-btn">TOCA PARA COPIAR</div>
             </div>
 
             <input type="number" id="dep-amount" placeholder="Monto enviado">
             <input type="text" id="tx-hash" placeholder="Hash o ID de transacción">
             <button class="btn-main" onclick="verifyTx()">PROCESAR DEPÓSITO</button>
-            
-            <h4 class="section-title">MIS DEPÓSITOS</h4>
-            <div id="status-depositos"></div>
+            <div id="status-depositos" style="margin-top:10px;"></div>
         </section>
 
         <section id="section-withdraw" style="display:none;">
             <h3 class="title-center">Retirar Ganancias</h3>
-            <div class="card">
-                <small class="balance-label">Disponible</small>
-                <div class="price" id="withdraw-available">$0.00</div>
-            </div>
             <input type="number" id="withdraw-amount" placeholder="Monto (Min $5)">
             <input type="text" id="withdraw-wallet" placeholder="Dirección BEP20">
             <button class="btn-main" onclick="procesarRetiro()" style="background:#f85149;">SOLICITAR RETIRO</button>
@@ -103,24 +101,24 @@
         </section>
 
         <section id="section-admin" style="display:none;">
-            <h3 class="title-center">Panel de Control</h3>
+            <h3 class="title-center">Panel Maestro</h3>
             <div class="admin-grid">
                 <div class="admin-col">
-                    <h4 class="balance-label">📥 Pendientes</h4>
+                    <h4 class="admin-header">📥 DEPÓSITOS</h4>
                     <div id="admin-dep-list"></div>
                 </div>
                 <div class="admin-col">
-                    <h4 class="balance-label">📤 Pendientes</h4>
+                    <h4 class="admin-header">📤 RETIROS</h4>
                     <div id="admin-ret-list"></div>
                 </div>
             </div>
-            <h4 class="section-title">HISTORIAL PROCESADOS</h4>
+            <h4 class="section-title">🔄 PROCESADOS (HISTORIAL)</h4>
             <div class="admin-grid">
                 <div class="admin-col">
-                    <div id="admin-hist-dep" class="hist-col"></div>
+                    <div id="admin-hist-dep" class="hist-container"></div>
                 </div>
                 <div class="admin-col">
-                    <div id="admin-hist-ret" class="hist-col"></div>
+                    <div id="admin-hist-ret" class="hist-container"></div>
                 </div>
             </div>
         </section>
