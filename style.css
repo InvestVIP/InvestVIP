@@ -1,48 +1,41 @@
-body { background: #0b0e14; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 15px; padding-bottom: 100px; }
+body { background: #0b0e14; color: white; font-family: sans-serif; margin: 0; padding: 15px 15px 100px; }
 #app { max-width: 450px; margin: auto; }
-.profile-header { text-align: center; margin-bottom: 25px; }
-.avatar { font-size: 40px; background: #1c2128; width: 70px; height: 70px; line-height: 70px; border-radius: 50%; margin: 0 auto 10px; border: 2px solid #58a6ff; }
-.status-badge { background: #238636; font-size: 0.7em; padding: 5px 12px; border-radius: 20px; font-weight: bold; }
+.profile-header { text-align: center; margin-bottom: 20px; }
+.avatar { font-size: 40px; background: #1c2128; width: 60px; height: 60px; line-height: 60px; border-radius: 50%; margin: auto; border: 2px solid #58a6ff; }
+.status-badge { background: #238636; font-size: 10px; padding: 4px 10px; border-radius: 10px; }
 
-/* DASHBOARD CARDS */
-.main-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.card, .card-special, .card-estimate { background: #161b22; padding: 15px; border-radius: 12px; border: 1px solid #30363d; text-align: center; }
-.card-special { border-color: #3fb950; margin-top: 12px; }
-.card-estimate { border-color: #f7931a; margin-top: 10px; }
-.price { font-size: 1.3em; font-weight: bold; color: #f7931a; }
-.price-green { font-size: 1.5em; font-weight: bold; color: #3fb950; }
-.price-neon { color: #00ffcc; font-weight: bold; font-size: 0.9em; }
-.balance-label { font-size: 0.7em; color: #8b949e; text-transform: uppercase; letter-spacing: 1px; }
+/* CARDS */
+.main-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.card, .card-special, .card-timer { background: #161b22; padding: 12px; border-radius: 10px; border: 1px solid #30363d; text-align: center; }
+.card-timer { border-color: #f7931a; }
+.timer-style { font-size: 1.5em; font-weight: bold; color: #f7931a; font-family: monospace; margin-top: 5px; }
+.price { font-size: 1.2em; color: #f7931a; font-weight: bold; }
+.price-green { font-size: 1.4em; color: #3fb950; font-weight: bold; }
+.balance-label { font-size: 0.65em; color: #8b949e; text-transform: uppercase; }
 
-/* SECCIONES Y LISTAS */
-.section-title { font-size: 0.75em; color: #8b949e; margin: 25px 0 10px; font-weight: bold; }
-.status-item { background: #1c2128; padding: 12px; margin-bottom: 8px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #30363d; font-size: 0.85em; }
+/* LISTS */
+.section-title { font-size: 11px; color: #8b949e; margin: 20px 0 8px; font-weight: bold; }
+.status-item { background: #1c2128; padding: 10px; margin-bottom: 6px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #30363d; font-size: 13px; }
 
-/* VIÑETAS POR COLOR */
-.border-bronce { border-left: 5px solid #cd7f32; }
-.border-plata { border-left: 5px solid #c0c0c0; }
-.border-oro { border-left: 5px solid #ffd700; }
-.border-vip { border-left: 5px solid #00ffcc; }
+/* COLORS */
+.price-neon { color: #00ffcc; font-weight: bold; }
+.border-bronce { border-left: 4px solid #cd7f32; }
+.border-plata { border-left: 4px solid #c0c0c0; }
+.border-oro { border-left: 4px solid #ffd700; }
+.border-vip { border-left: 4px solid #00ffcc; }
 
-/* INVERTIR GRID */
-.miner-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.miner-card { background: #161b22; padding: 15px; border-radius: 18px; border: 1px solid #30363d; text-align: center; }
-.plan-icon { font-size: 3.5em; margin-bottom: 5px; }
-.plan-stats { font-size: 0.7em; color: #3fb950; margin: 8px 0; line-height: 1.4; }
-.btn-activate { background: #f7931a; color: white; width: 100%; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+/* FORMS */
+input { width: 100%; padding: 12px; background: #161b22; border: 1px solid #30363d; color: white; border-radius: 8px; margin-bottom: 8px; box-sizing: border-box; }
+.btn-main { background: #3fb950; color: white; width: 100%; border: none; padding: 12px; border-radius: 8px; font-weight: bold; }
+.wallet-box { background: #0b0e14; border: 1px dashed #58a6ff; padding: 12px; border-radius: 10px; text-align: center; margin-bottom: 15px; cursor: pointer; }
+.wallet-addr { font-size: 11px; word-break: break-all; margin: 5px 0; }
+.red-warning { background: rgba(248, 81, 73, 0.1); color: #f85149; padding: 10px; border-radius: 8px; font-size: 11px; border: 1px solid #f85149; margin-bottom: 10px; text-align: center; }
 
-/* DEPÓSITO UI */
-.red-warning { background: rgba(248, 81, 73, 0.1); color: #f85149; padding: 12px; border-radius: 10px; font-size: 0.75em; border: 1px solid #f85149; margin-bottom: 15px; font-weight: bold; }
-.wallet-box { background: #0b0e14; border: 1px dashed #58a6ff; padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 15px; cursor: pointer; }
-.wallet-addr { font-size: 0.7em; color: #fff; margin: 5px 0; word-break: break-all; font-family: monospace; }
-input { width: 100%; padding: 15px; background: #161b22; border: 1px solid #30363d; color: white; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box; }
-.btn-main { background: #3fb950; color: white; width: 100%; border: none; padding: 15px; border-radius: 12px; font-weight: bold; }
+/* NAV */
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #161b22; display: flex; justify-content: space-around; padding: 10px; border-top: 1px solid #30363d; }
+.bottom-nav button { background: transparent; color: #8b949e; border: none; font-size: 10px; }
 
-/* NAV BAR */
-.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #161b22; display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid #30363d; }
-.bottom-nav button { background: transparent; color: #8b949e; border: none; font-size: 0.75em; display: flex; flex-direction: column; align-items: center; }
-
-/* ADMIN UI MAESTRO */
+/* ADMIN */
 .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.admin-card-mini { background: #1c2128; padding: 8px; border-radius: 8px; font-size: 0.72em; border: 1px solid #30363d; margin-bottom: 8px; }
-.admin-card-mini button { background: #f7931a; color: white; border: none; padding: 6px; width: 100%; border-radius: 4px; margin-top: 5px; font-weight: bold; cursor: pointer; }
+.admin-card-mini { background: #1c2128; padding: 6px; border-radius: 6px; border: 1px solid #30363d; margin-bottom: 6px; font-size: 11px; }
+.admin-card-mini button { background: #f7931a; border: none; padding: 4px; border-radius: 4px; font-weight: bold; font-size: 10px; }
