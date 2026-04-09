@@ -52,12 +52,28 @@ async function actualizarMisPlanes() {
 }
 
 async function actualizarHistorial() {
-    let { data: h } = await supabaseClient.from('solicitudes').select('*').eq('id_telegram', userId).order('fecha', {ascending: false}).limit(5);
+    let { data: h } = await supabaseClient.from('solicitudes').select('*').eq('id_telegram', userId).order('fecha', {ascending: false}).limit(10);
     const hDiv = document.getElementById('lista-historial');
     hDiv.innerHTML = "";
     h?.forEach(s => {
+        let textoTipo = s.tipo.toUpperCase();
+        let montoMostrar = s.monto;
         let color = s.tipo === 'retiro' ? '#f85149' : '#3fb950';
-        hDiv.innerHTML += `<div class="status-item"><span>${s.tipo.toUpperCase()}</span><strong style="color:${color}">${s.tipo==='retiro'?'-':'+'}$${s.monto.toFixed(2)}</strong></div>`;
+        let signo = s.tipo === 'retiro' ? '-' : '+';
+
+        // Lógica especial para registros de Activación
+        if (s.detalles && s.detalles.includes("Activación Plan")) {
+            textoTipo = s.detalles.toUpperCase();
+            color = '#f85149'; // Rojo
+            signo = '-';
+            // Asignar monto manual según el plan si el registro viene en 0
+            if (s.detalles.includes("Bronce")) montoMostrar = 11;
+            else if (s.detalles.includes("Plata")) montoMostrar = 30;
+            else if (s.detalles.includes("Oro")) montoMostrar = 60;
+            else if (s.detalles.includes("VIP")) montoMostrar = 120;
+        }
+
+        hDiv.innerHTML += `<div class="status-item"><span>${textoTipo}</span><strong style="color:${color}">${signo}$${montoMostrar.toFixed(2)}</strong></div>`;
     });
 }
 
