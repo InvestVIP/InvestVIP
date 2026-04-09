@@ -1,3 +1,4 @@
+/* ESTILOS BASE */
 body { 
     background: #0b0e14; 
     color: white; 
@@ -12,12 +13,14 @@ body {
     margin: auto; 
 }
 
+/* PANTALLA PRINCIPAL Y BALANCE */
 .balance-display { 
     font-size: 2.2em; 
     font-weight: 800; 
     color: #ffffff; 
     text-shadow: 0 0 15px rgba(247, 147, 26, 0.2); 
     margin: 5px 0; 
+    text-align: center;
 }
 
 .balance-label { 
@@ -51,6 +54,7 @@ body {
     font-weight: bold; 
 }
 
+/* TARJETAS Y CUADRÍCULA DE MINERÍA */
 .main-cards { 
     display: grid; 
     grid-template-columns: 1fr 1fr; 
@@ -77,6 +81,11 @@ body {
     border-radius: 18px; 
     border: 1px solid #30363d; 
     text-align: center; 
+    transition: transform 0.2s;
+}
+
+.miner-card:active {
+    transform: scale(0.98);
 }
 
 .plan-details-visual { 
@@ -97,6 +106,7 @@ body {
     margin: 2px 0; 
 }
 
+/* FORMULARIOS Y BOTONES */
 input { 
     width: 100%; 
     padding: 14px; 
@@ -131,6 +141,7 @@ button {
     margin-top: 10px; 
 }
 
+/* NAVEGACIÓN Y BILLETERA */
 .bottom-nav { 
     position: fixed; 
     bottom: 0; 
@@ -162,6 +173,20 @@ button {
     text-align: center; 
     margin: 15px 0; 
     font-size: 0.8em; 
+    word-break: break-all;
+}
+
+/* PANEL ADMIN E HISTORIAL */
+.admin-historial-item { 
+    font-size: 0.75em; 
+    background: #1c2128; 
+    padding: 10px; 
+    margin-bottom: 8px; 
+    border-radius: 8px; 
+    border: 1px solid #30363d; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
 }
 
 .red-warning { 
@@ -173,15 +198,4 @@ button {
     text-align: center; 
     font-weight: bold; 
     margin-bottom: 10px; 
-}
-
-.admin-historial-item { 
-    font-size: 0.7em; 
-    background: #1c2128; 
-    padding: 8px; 
-    margin-bottom: 5px; 
-    border-radius: 5px; 
-    border: 1px solid #30363d; 
-    display: flex; 
-    justify-content: space-between; 
 }
