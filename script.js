@@ -105,7 +105,7 @@ async function procesarRetiro() {
     } else alert("Saldo insuficiente.");
 }
 
-// CARGAR ADMIN CON INPUTS DE SEGURIDAD
+// ADMIN ACTUALIZADO
 async function cargarAdmin() {
     const depDiv = document.getElementById('admin-dep-list');
     const retDiv = document.getElementById('admin-ret-list');
@@ -120,11 +120,20 @@ async function cargarAdmin() {
     pendientes?.forEach(s => {
         const esDep = s.tipo === 'deposito';
         const color = esDep ? '#3fb950' : '#f85149';
+        
+        // Helper para copiar texto
+        const btnCopiar = (txt) => `<button onclick="navigator.clipboard.writeText('${txt}'); alert('Copiado');" style="background:#30363d; border:none; color:#c9d1d9; font-size:0.7em; padding:2px 5px; border-radius:3px; cursor:pointer; margin-left:5px;">Copiar</button>`;
+
         const item = `
             <div class="admin-card-mini" style="border-left: 4px solid ${color}; background: #161b22; padding: 10px; margin-bottom: 12px; border-radius: 4px;">
                 <div style="font-size:0.75em; color:#8b949e; margin-bottom:5px;">
                     <strong>USER:</strong> ${s.id_telegram}<br>
-                    <strong>DATO USUARIO:</strong> <span style="color:#e6edf3; word-break: break-all;">${s.detalles}</span>
+                    <strong>DATO USUARIO:</strong> <span style="color:#e6edf3; word-break: break-all;">${s.detalles}</span> ${btnCopiar(s.detalles)}
+                </div>
+                
+                <div style="margin: 8px 0;">
+                    <span style="color:#8b949e; font-size:0.8em;">MONTO SOLICITADO:</span><br>
+                    <strong style="font-size: 1.4em; color: ${color};">$${s.monto.toFixed(2)}</strong> ${btnCopiar(s.monto)}
                 </div>
                 
                 ${esDep ? `
@@ -148,18 +157,24 @@ async function cargarAdmin() {
 
     let { data: procesados } = await supabaseClient.from('solicitudes').select('*').neq('estado', 'pendiente').order('fecha', {ascending: false}).limit(30);
     procesados?.forEach(p => {
-        const color = p.tipo === 'deposito' ? '#3fb950' : '#f85149';
+        const esDep = p.tipo === 'deposito';
+        const color = esDep ? '#3fb950' : '#f85149';
+        const label = esDep ? '📥 DEPÓSITO' : '📤 RETIRO';
+        
         procDiv.innerHTML += `
-            <div style="border-bottom:1px solid #30363d; padding:8px 0; font-size:0.85em;">
-                <span style="color:${color}">${p.tipo==='deposito'?'📥':'📤'}</span> 
-                <strong style="color:#e6edf3;">$${p.monto.toFixed(2)}</strong>
-                <span style="color:#8b949e; float:right;">${p.estado}</span><br>
-                <small style="color:#484f58;">User: ${p.id_telegram}</small>
+            <div style="border-bottom:1px solid #30363d; padding:10px 0; font-size:0.85em;">
+                <div style="display:flex; justify-content:space-between;">
+                    <strong style="color:${color}">${label}</strong>
+                    <span style="color:#8b949e;">${p.estado}</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-top:3px;">
+                    <strong style="color:#e6edf3;">$${p.monto.toFixed(2)}</strong>
+                    <small style="color:#484f58;">User: ${p.id_telegram.slice(-5)}</small>
+                </div>
             </div>`;
     });
 }
 
-// GESTIONAR SOLICITUD CON BLINDAJE
 async function gestionarSolicitud(id, tipo, targetUid) {
     try {
         let updateData = { estado: 'completado' };
@@ -182,7 +197,6 @@ async function gestionarSolicitud(id, tipo, targetUid) {
             
             if (!confirm("¿Ya enviaste el dinero? Esta acción registrará el hash y cerrará la solicitud.")) return;
             
-            // Registramos el hash del admin en los detalles finales
             updateData.detalles = "HASH PAGO: " + hashAdmin; 
         }
 
