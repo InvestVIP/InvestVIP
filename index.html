@@ -37,9 +37,11 @@
 
             <h4 class="section-title">📦 MIS PLANES ACTIVOS</h4>
             <div id="lista-planes"></div>
+        </section>
 
-            <h4 class="section-title">📑 HISTORIAL RECIENTE</h4>
-            <div id="lista-historial"></div>
+        <section id="section-history" style="display:none;">
+            <h3 class="title-center">Historial Unificado</h3>
+            <div id="lista-historial-completo"></div>
         </section>
 
         <section id="section-invest" style="display:none;">
@@ -79,23 +81,19 @@
         <section id="section-deposit" style="display:none;">
             <h3 class="title-center">Recargar Saldo</h3>
             <div class="alert-box info">⚠️ Solo Red BEP20 (USDT)</div>
-            
             <div class="input-group">
                 <label class="balance-label">Monto enviado (USDT)</label>
                 <input type="number" id="dep-amount" placeholder="0.00">
             </div>
-
             <div class="copy-container" onclick="copyWallet()">
                 <div class="copy-label">DIRECCIÓN USDT (BEP20)</div>
                 <code id="wallet-addr">0xd6fe607116c1df2b4dae56e77ffdae50cde9d153</code>
                 <div class="copy-btn">TOCA PARA COPIAR</div>
             </div>
-
             <div class="input-group">
                 <label class="balance-label">Hash de Transacción</label>
                 <input type="text" id="tx-hash" placeholder="Pega el hash aquí">
             </div>
-            
             <button class="btn-main" onclick="verifyTx()">INFORMAR PAGO</button>
         </section>
 
@@ -127,6 +125,7 @@
         <nav class="bottom-nav">
             <button onclick="nav('section-home')">👤<br>Perfil</button>
             <button onclick="nav('section-invest')">📈<br>Invertir</button>
+            <button onclick="nav('section-history')">📜<br>Historial</button>
             <button onclick="nav('section-deposit')">💰<br>Depósito</button>
             <button onclick="nav('section-withdraw')">💸<br>Retiro</button>
             <button id="btn-admin-tab" onclick="nav('section-admin')" style="display:none; color:#f7931a;">⚙️<br>Admin</button>
