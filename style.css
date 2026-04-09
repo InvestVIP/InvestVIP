@@ -31,3 +31,51 @@ input { width: 100%; padding: 12px; margin: 5px 0 15px; background: #0d1117; bor
 .bottom-nav button { background: transparent; color: #8b949e; border: none; font-size: 0.7em; flex: 1; cursor: pointer; }
 .title-center { text-align: center; color: #f7931a; margin-bottom: 15px; }
 #admin-historial-procesados { max-height: 400px; overflow-y: auto; background: #0d1117; padding: 5px; border-radius: 8px; }
+/* --- Mejoras para el Panel Admin y Usabilidad --- */
+
+/* Estilo para los nuevos botones de copiar */
+button[onclick*="navigator.clipboard"] {
+    transition: background 0.2s, transform 0.1s;
+    text-transform: uppercase;
+    font-weight: bold;
+    border: 1px solid #30363d !important;
+}
+
+button[onclick*="navigator.clipboard"]:active {
+    background: #58a6ff !important;
+    color: white !important;
+    transform: scale(0.92);
+}
+
+/* Contenedor de inputs dentro del admin para que no se peguen */
+.admin-card-mini input {
+    margin: 8px 0 !important;
+    padding: 8px !important;
+    font-size: 0.9em;
+}
+
+/* Ajuste para que los textos largos (Hashes/Wallets) no rompan el diseño */
+span[style*="word-break: break-all"] {
+    display: inline-block;
+    padding: 4px;
+    background: #0d1117;
+    border-radius: 4px;
+    margin-top: 5px;
+}
+
+/* Mejora visual para los items del historial procesado */
+#admin-historial-procesados > div {
+    transition: background 0.3s;
+}
+
+#admin-historial-procesados > div:hover {
+    background: #161b22;
+}
+
+/* Espaciado extra para los inputs de usuario en depósito/retiro */
+.input-group small {
+    display: block;
+    margin-top: -10px;
+    margin-bottom: 15px;
+    margin-left: 5px;
+}
