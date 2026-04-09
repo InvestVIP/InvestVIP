@@ -9,7 +9,6 @@ const userName = tg.initDataUnsafe?.user?.first_name || 'Inversionista';
 function iniciarApp() {
     if (!window.supabase) { setTimeout(iniciarApp, 100); return; }
     supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } });
-    if (tg) { tg.ready(); tg.expand(); }
     cargarDatos();
     setInterval(procesarPagosDiarios, 60000); 
 }
@@ -19,16 +18,15 @@ async function cargarDatos() {
         if (userId === "8754466303") document.getElementById('btn-admin-tab').style.display = 'flex';
         let { data: u } = await supabaseClient.from('usuarios').select('*').eq('id_telegram', userId).maybeSingle();
         if (!u) {
-            const { data: n } = await supabaseClient.from('usuarios').insert([{ id_telegram: userId, saldo_deposito: 0, saldo_retirable: 0, total_retirado: 0 }]).select().single();
+            const { data: n } = await supabaseClient.from('usuarios').insert([{ id_telegram: userId, saldo_deposito: 0, saldo_retirable: 0 }]).select().single();
             u = n;
         }
         document.getElementById('username').innerText = userName;
         document.getElementById('home-saldo-deposito').innerText = "$" + (u.saldo_deposito || 0).toFixed(2);
         document.getElementById('home-saldo-retirable').innerText = "$" + (u.saldo_retirable || 0).toFixed(2);
-        document.getElementById('withdraw-available').innerText = "$" + (u.saldo_retirable || 0).toFixed(2);
         
-        actualizarMisPlanes();
-        actualizarHistorialHome();
+        await actualizarMisPlanes();
+        await actualizarHistorialHome();
     } catch (e) { console.error(e); }
 }
 
@@ -42,25 +40,29 @@ async function invertir(costo, nombre, ganancia) {
         }]);
         alert(`Plan ${nombre} Activado, tu minería ha comenzado!`);
         nav('section-home');
-    } else alert("Saldo insuficiente.");
+    } else alert("Saldo insuficiente para este plan.");
 }
 
 async function actualizarMisPlanes() {
     let { data: planes } = await supabaseClient.from('planes_activos').select('*').eq('id_telegram', userId).eq('activo', true);
     const div = document.getElementById('lista-planes');
     let total = 0; div.innerHTML = "";
-    if(planes) {
+    
+    if(planes && planes.length > 0) {
         planes.forEach(p => {
             total += p.ganancia_diaria;
             let tag = p.nombre_plan.toLowerCase();
             div.innerHTML += `<div class="status-item border-${tag}"><b>${p.nombre_plan.toUpperCase()}</b><div class="price-neon">+$${p.ganancia_diaria.toFixed(2)}/día</div></div>`;
         });
+    } else {
+        div.innerHTML = "<small style='color:#8b949e'>No tienes planes activos</small>";
     }
     document.getElementById('home-estimado-diario').innerText = "$" + total.toFixed(2);
 }
 
 async function actualizarHistorialHome() {
-    let { data: h } = await supabaseClient.from('solicitudes').select('*').eq('id_telegram', userId).neq('monto', 0).order('fecha', {ascending: false}).limit(10);
+    // Filtrar montos 0 para no ensuciar el perfil
+    let { data: h } = await supabaseClient.from('solicitudes').select('*').eq('id_telegram', userId).neq('monto', 0).order('fecha', {ascending: false}).limit(8);
     const div = document.getElementById('lista-historial'); div.innerHTML = "";
     h?.forEach(s => {
         let color = s.tipo === 'retiro' ? '#f85149' : (s.tipo === 'deposito' ? '#3fb950' : '#00ffcc');
@@ -75,15 +77,17 @@ async function cargarAdmin() {
     const hRet = document.getElementById('admin-hist-ret');
     dList.innerHTML = ""; rList.innerHTML = ""; hDep.innerHTML = ""; hRet.innerHTML = "";
 
-    let { data: sol } = await supabaseClient.from('solicitudes').select('*').order('fecha', {ascending: false});
+    // Solo registros con monto real
+    let { data: sol } = await supabaseClient.from('solicitudes').select('*').neq('monto', 0).order('fecha', {ascending: false});
+    
     sol?.forEach(s => {
         const item = `<div class="admin-card-mini">
-            <small>ID: ${s.id_telegram}</small><br>
-            $${s.monto} <button onclick="gestionarAdmin('${s.id}','${s.id_telegram}','${s.tipo}',${s.monto})">OK</button>
+            <small>${s.id_telegram}</small><br>$${s.monto} 
+            <button onclick="gestionarAdmin('${s.id}','${s.id_telegram}','${s.tipo}',${s.monto})">REVISAR</button>
         </div>`;
 
-        const histItem = `<div class="admin-card-mini" style="opacity:0.7">
-            <small>${s.id_telegram}</small><br><b>$${s.monto}</b>
+        const histItem = `<div class="admin-card-mini hist-item">
+            <small>${s.id_telegram}</small><br><b>$${s.monto}</b> <small>(${s.estado})</small>
         </div>`;
 
         if(s.estado === 'pendiente') {
@@ -106,9 +110,9 @@ function nav(id) {
 async function verifyTx() {
     const hash = document.getElementById('tx-hash').value;
     const monto = parseFloat(document.getElementById('dep-amount').value);
-    if (!hash || isNaN(monto)) return alert("Datos inválidos.");
+    if (!hash || isNaN(monto)) return alert("Completa todos los datos.");
     await supabaseClient.from('solicitudes').insert([{ id_telegram: userId, tipo: 'deposito', detalles: hash, estado: 'pendiente', monto: monto }]);
-    alert("⌛ Recibido. Verificaremos tu depósito pronto.");
+    alert("⌛ Datos enviados. Espera la confirmación del administrador.");
     nav('section-home');
 }
 
@@ -119,9 +123,9 @@ async function procesarRetiro() {
     let { data: u } = await supabaseClient.from('usuarios').select('saldo_retirable').eq('id_telegram', userId).single();
     if (u?.saldo_retirable >= monto) {
         await supabaseClient.from('solicitudes').insert([{ id_telegram: userId, tipo: 'retiro', monto: monto, detalles: wallet, estado: 'pendiente' }]);
-        alert("✅ Solicitud enviada.");
+        alert("✅ Solicitud de retiro en proceso.");
         nav('section-home');
-    } else alert("Saldo insuficiente.");
+    } else alert("Saldo insuficiente para retirar.");
 }
 
 async function cargarStatusLocal(tipo, divId) {
@@ -135,16 +139,16 @@ async function cargarStatusLocal(tipo, divId) {
 
 async function gestionarAdmin(id, userT, tipo, montoOri) {
     if (tipo === 'deposito') {
-        let real = parseFloat(prompt("Confirmar monto real:", montoOri));
+        let real = parseFloat(prompt("Confirmar monto a acreditar:", montoOri));
         if (isNaN(real)) return;
         let { data: u } = await supabaseClient.from('usuarios').select('saldo_deposito').eq('id_telegram', userT).single();
         await supabaseClient.from('usuarios').update({ saldo_deposito: (u.saldo_deposito || 0) + real }).eq('id_telegram', userT);
         await supabaseClient.from('solicitudes').update({ monto: real, estado: 'completado', fecha: new Date().toISOString() }).eq('id', id);
     } else {
-        let hash = prompt("Hash de pago:");
+        let hash = prompt("Hash del pago realizado:");
         if (!hash) return;
         let { data: u } = await supabaseClient.from('usuarios').select('*').eq('id_telegram', userT).single();
-        await supabaseClient.from('usuarios').update({ saldo_retirable: u.saldo_retirable - montoOri, total_retirado: (u.total_retirado || 0) + montoOri }).eq('id_telegram', userT);
+        await supabaseClient.from('usuarios').update({ saldo_retirable: u.saldo_retirable - montoOri }).eq('id_telegram', userT);
         await supabaseClient.from('solicitudes').update({ detalles: hash, estado: 'completado', fecha: new Date().toISOString() }).eq('id', id);
     }
     cargarAdmin();
@@ -163,5 +167,5 @@ async function procesarPagosDiarios() {
     }
 }
 
-function copyText(txt) { navigator.clipboard.writeText(txt); alert("✅ Copiado al portapapeles"); }
+function copyText(txt) { navigator.clipboard.writeText(txt); alert("✅ Dirección copiada"); }
 document.addEventListener('DOMContentLoaded', iniciarApp);
