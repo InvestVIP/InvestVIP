@@ -30,14 +30,14 @@
                 </div>
             </div>
 
-            <div class="card-timer">
-                <small class="balance-label">Próximo Pago de Ganancias</small>
-                <div id="countdown-timer" class="timer-style">--:--:--</div>
+            <div class="card-special">
+                <small class="balance-label">Ganancias Retiradas</small>
+                <div class="price-green" id="home-total-retirado">$0.00</div>
             </div>
 
-            <div class="card-special" style="margin-top:10px;">
-                <small class="balance-label">Ganancias Totales Retiradas</small>
-                <div class="price-green" id="home-total-retirado">$0.00</div>
+            <div class="card-estimate">
+                <small class="balance-label">Estimado Diario Total</small>
+                <div id="home-estimado-diario" style="font-size: 1.8em; font-weight: bold; color: #f7931a;">$0.00</div>
             </div>
 
             <h4 class="section-title">📦 MIS PLANES ACTIVOS</h4>
@@ -54,24 +54,28 @@
                     <div class="plan-icon">🥉</div>
                     <div class="balance-label">BRONCE</div>
                     <div class="price">$11</div>
+                    <div class="plan-stats">Diario: $0.65<br><b>60 días: $39.00</b></div>
                     <button class="btn-activate">ACTIVAR</button>
                 </div>
                 <div class="miner-card silver" onclick="invertir(30, 'Plata', 1.66)">
                     <div class="plan-icon">🥈</div>
                     <div class="balance-label">PLATA</div>
                     <div class="price">$30</div>
+                    <div class="plan-stats">Diario: $1.66<br><b>60 días: $99.60</b></div>
                     <button class="btn-activate">ACTIVAR</button>
                 </div>
                 <div class="miner-card gold" onclick="invertir(60, 'Oro', 3.00)">
                     <div class="plan-icon">🥇</div>
                     <div class="balance-label">ORO</div>
                     <div class="price">$60</div>
+                    <div class="plan-stats">Diario: $3.00<br><b>60 días: $180.00</b></div>
                     <button class="btn-activate">ACTIVAR</button>
                 </div>
                 <div class="miner-card vip" onclick="invertir(120, 'VIP', 6.30)">
                     <div class="plan-icon">💎</div>
                     <div class="balance-label">VIP</div>
                     <div class="price">$120</div>
+                    <div class="plan-stats">Diario: $6.30<br><b>60 días: $378.00</b></div>
                     <button class="btn-activate">ACTIVAR</button>
                 </div>
             </div>
@@ -79,30 +83,34 @@
 
         <section id="section-deposit" style="display:none;">
             <h3 class="title-center">Cargar Saldo</h3>
+            <div class="red-warning">⚠️ ATENCIÓN: Solo Red BEP20. Otras redes resultarán en pérdida total.</div>
             <div class="wallet-box" onclick="copyText('0xd6fe607116c1df2b4dae56e77ffdae50cde9d153')">
                 <small class="balance-label">DIRECCIÓN USDT (BEP20)</small>
                 <div class="wallet-addr">0xd6fe607116c1df2b4dae56e77ffdae50cde9d153</div>
                 <small style="color: #58a6ff;">Toca para copiar</small>
             </div>
-            <input type="number" id="dep-amount" placeholder="Monto depositado">
-            <input type="text" id="tx-hash" placeholder="Hash de transacción">
+            <input type="number" id="dep-amount" placeholder="Monto depositado (Ej: 11)">
+            <input type="text" id="tx-hash" placeholder="Hash: 0x7a2... (ID Transacción)">
             <button class="btn-main" onclick="verifyTx()">PROCESAR DEPÓSITO</button>
-            <h4 class="section-title">MIS DEPÓSITOS</h4>
+            <h4 class="section-title">ESTADO DE DEPÓSITOS</h4>
             <div id="status-depositos"></div>
         </section>
 
         <section id="section-withdraw" style="display:none;">
             <h3 class="title-center">Retirar Ganancias</h3>
-            <div class="red-warning">💡 Regla: Solo se permite 1 retiro cada 48 horas.</div>
+            <div class="card">
+                <small class="balance-label">Disponible para Retiro</small>
+                <div class="price" id="withdraw-available" style="font-size: 1.8em;">$0.00</div>
+            </div>
             <input type="number" id="withdraw-amount" placeholder="Monto (Min $5)">
-            <input type="text" id="withdraw-wallet" placeholder="Dirección BEP20">
-            <button class="btn-main" id="btn-withdraw-proc" onclick="procesarRetiro()" style="background:#f85149;">PROCESAR RETIRO</button>
+            <input type="text" id="withdraw-wallet" placeholder="Dirección Billetera BEP20">
+            <button class="btn-main" onclick="procesarRetiro()" style="background:#f85149;">PROCESAR RETIRO</button>
             <h4 class="section-title">ESTADO DE RETIROS</h4>
             <div id="status-retiros"></div>
         </section>
 
         <section id="section-admin" style="display:none;">
-            <h3 class="title-center">Panel Admin</h3>
+            <h3 class="title-center">Panel Maestro</h3>
             <div class="admin-grid">
                 <div class="admin-col">
                     <h4 class="balance-label">📥 Depósitos</h4>
@@ -113,7 +121,7 @@
                     <div id="admin-ret-list"></div>
                 </div>
             </div>
-            <h4 class="section-title">HISTORIAL GLOBAL APROBADOS</h4>
+            <h4 class="section-title">🔄 LOG GLOBAL DE APROBADOS</h4>
             <div id="admin-global-log"></div>
         </section>
 
