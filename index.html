@@ -35,15 +35,15 @@
                 <div class="price-green" id="home-total-retirado">$0.00</div>
             </div>
 
-            <div class="card" style="border-color: #f7931a; margin-top: 10px;">
+            <div class="card-estimate">
                 <small class="balance-label">Estimado Diario Total</small>
-                <div class="balance-display" id="home-estimado-diario" style="font-size: 1.8em;">$0.00</div>
+                <div id="home-estimado-diario" style="font-size: 1.8em; font-weight: bold; color: #f7931a;">$0.00</div>
             </div>
 
             <h4 class="section-title">📦 MIS PLANES ACTIVOS</h4>
             <div id="lista-planes"></div>
 
-            <h4 class="section-title">📑 HISTORIAL DE ACTIVIDAD</h4>
+            <h4 class="section-title">📑 HISTORIAL RECIENTE</h4>
             <div id="lista-historial"></div>
         </section>
 
@@ -83,33 +83,34 @@
 
         <section id="section-deposit" style="display:none;">
             <h3 class="title-center">Cargar Saldo</h3>
-            <div class="red-warning">⚠️ ATENCIÓN: Solo depósitos bajo Red BEP20. Si envía por otra red, su dinero se perderá.</div>
+            <div class="red-warning">⚠️ ATENCIÓN: Solo Red BEP20. Otras redes resultarán en pérdida total.</div>
             <div class="wallet-box" onclick="copyText('0xd6fe607116c1df2b4dae56e77ffdae50cde9d153')">
                 <small class="balance-label">DIRECCIÓN USDT (BEP20)</small>
                 <div class="wallet-addr">0xd6fe607116c1df2b4dae56e77ffdae50cde9d153</div>
-                <small style="color: #58a6ff;">Toca para copiar dirección</small>
+                <small style="color: #58a6ff;">Toca para copiar</small>
             </div>
-            <input type="text" id="tx-hash" placeholder="Hash: 0x7a2b... (Ejemplo)">
+            <input type="number" id="dep-amount" placeholder="Monto depositado (Ej: 11)">
+            <input type="text" id="tx-hash" placeholder="Hash: 0x7a2... (ID Transacción)">
             <button class="btn-main" onclick="verifyTx()">PROCESAR DEPÓSITO</button>
-            <h4 class="section-title">ESTADO DE DEPÓSITOS</h4>
+            <h4 class="section-title">MIS SOLICITUDES</h4>
             <div id="status-depositos"></div>
         </section>
 
         <section id="section-withdraw" style="display:none;">
             <h3 class="title-center">Retirar Ganancias</h3>
             <div class="card">
-                <small class="balance-label">Disponible para Retiro</small>
+                <small class="balance-label">Disponible</small>
                 <div class="price" id="withdraw-available" style="font-size: 1.8em;">$0.00</div>
             </div>
             <input type="number" id="withdraw-amount" placeholder="Monto (Min $5)">
-            <input type="text" id="withdraw-wallet" placeholder="Dirección Billetera BEP20">
+            <input type="text" id="withdraw-wallet" placeholder="Billetera USDT BEP20">
             <button class="btn-main" onclick="procesarRetiro()" style="background:#f85149;">PROCESAR RETIRO</button>
             <h4 class="section-title">ESTADO DE RETIROS</h4>
             <div id="status-retiros"></div>
         </section>
 
         <section id="section-admin" style="display:none;">
-            <h3 class="title-center">Panel Admin</h3>
+            <h3 class="title-center">Panel Maestro</h3>
             <div class="admin-grid">
                 <div class="admin-col">
                     <h4 class="balance-label">📥 Depósitos</h4>
@@ -120,6 +121,8 @@
                     <div id="admin-ret-list"></div>
                 </div>
             </div>
+            <h4 class="section-title">ÚLTIMOS APROBADOS</h4>
+            <div id="admin-global-log"></div>
         </section>
 
         <nav class="bottom-nav">
