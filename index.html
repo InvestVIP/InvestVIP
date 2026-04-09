@@ -83,7 +83,7 @@
             <div class="alert-box info">⚠️ Solo Red BEP20 (USDT)</div>
             <div class="input-group">
                 <label class="balance-label">Monto enviado (USDT)</label>
-                <input type="number" id="dep-amount" placeholder="0.00">
+                <input type="number" id="dep-amount" placeholder="Ej: 50.00">
             </div>
             <div class="copy-container" onclick="copyWallet()">
                 <div class="copy-label">DIRECCIÓN USDT (BEP20)</div>
@@ -91,8 +91,9 @@
                 <div class="copy-btn">TOCA PARA COPIAR</div>
             </div>
             <div class="input-group">
-                <label class="balance-label">Hash de Transacción</label>
-                <input type="text" id="tx-hash" placeholder="Pega el hash aquí">
+                <label class="balance-label">Hash de Transacción (TXID)</label>
+                <input type="text" id="tx-hash" placeholder="Ej: 0x7a2b...c4d" maxlength="66">
+                <small style="color: #8b949e; font-size: 0.7em;">Debe ser el hash de la red BEP20.</small>
             </div>
             <button class="btn-main" onclick="verifyTx()">INFORMAR PAGO</button>
         </section>
@@ -103,8 +104,13 @@
                 <small class="balance-label">Disponible:</small>
                 <div class="price" id="withdraw-available" style="font-size:1.8em">$0.00</div>
             </div>
-            <input type="number" id="withdraw-amount" placeholder="Monto (Min $5)">
-            <input type="text" id="withdraw-wallet" placeholder="Dirección USDT BEP20">
+            <div class="input-group">
+                <input type="number" id="withdraw-amount" placeholder="Monto (Min $5)">
+            </div>
+            <div class="input-group">
+                <input type="text" id="withdraw-wallet" placeholder="Ej: 0x1234...abcd (Billetera BEP20)" maxlength="42">
+                <small style="color: #8b949e; font-size: 0.7em;">Verifica que la dirección sea BEP20.</small>
+            </div>
             <button class="btn-main" onclick="procesarRetiro()" style="background:#f85149;">SOLICITAR RETIRO</button>
         </section>
 
@@ -115,10 +121,10 @@
                     <h4 class="admin-header">📥 PENDIENTES</h4>
                     <div id="admin-dep-list" style="margin-bottom: 15px; border-bottom: 1px dashed #333; padding-bottom: 10px;">
                         <small style="color: #3fb950; display: block; text-align: center; margin-bottom: 5px; font-weight: bold;">DEPÓSITOS</small>
-                        </div>
+                    </div>
                     <div id="admin-ret-list">
                         <small style="color: #f85149; display: block; text-align: center; margin-bottom: 5px; font-weight: bold;">RETIROS</small>
-                        </div>
+                    </div>
                 </div>
                 <div class="admin-column">
                     <h4 class="admin-header">✅ PROCESADOS</h4>
