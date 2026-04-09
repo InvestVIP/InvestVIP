@@ -1,0 +1,127 @@
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<div id="app">
+    <section id="section-home">
+        <header class="profile-header">
+            <div class="avatar">👤</div>
+            <h2 id="username">Cargando...</h2>
+            <span class="status-badge">Inversionista Verificado</span>
+        </header>
+        <div class="main-cards">
+            <div class="card"><small>Saldo Depósito</small><h3>$<span id="home-saldo-deposito">0.00</span></h3></div>
+            <div class="card"><small>Ganancias Retirables</small><h3>$<span id="home-saldo-retirable">0.00</span></h3></div>
+        </div>
+
+        <div class="active-plans-container" style="margin-top: 20px; text-align: left;">
+            <h4 style="margin-bottom: 10px; color: #8b949e; font-size: 0.85em; letter-spacing: 1px;">📑 MIS PLANES ACTIVOS</h4>
+            <div id="lista-planes" class="plans-list"></div>
+        </div>
+
+        <div class="history-container" style="margin-top: 25px; text-align: left;">
+            <h4 style="margin-bottom: 10px; color: #8b949e; font-size: 0.85em; letter-spacing: 1px;">🕒 HISTORIAL RECIENTE</h4>
+            <div id="lista-historial" class="plans-list"></div>
+        </div>
+
+        <div class="card card-retirado" style="margin-top: 20px; background: #0d162a;">
+            <small>Total Ganancias Retiradas</small>
+            <h3 style="color: #58a6ff;">$<span id="home-total-retirado">0.00</span></h3>
+        </div>
+    </section>
+
+    <section id="section-invest" style="display:none;">
+        <div class="invest-hero"><small>DISPONIBLE</small><h2 id="invest-saldo-deposito">$0.00</h2></div>
+        <div class="miner-grid">
+            <div class="miner-card" onclick="toggleInfo('i1')">
+                <div style="font-size:1.5em">🥉</div><h4>Bronce</h4><p class="price">$11.00</p>
+                <div id="i1" class="plan-details"><hr>
+                    <p>📈 Diario: <b>$0.65</b></p>
+                    <p>📅 Ciclo 60d: <b>$39.00</b></p>
+                    <button class="btn-activate" onclick="event.stopPropagation(); invertir(11)">ACTIVAR</button>
+                </div>
+            </div>
+            <div class="miner-card" onclick="toggleInfo('i2')">
+                <div style="font-size:1.5em">🥈</div><h4>Plata</h4><p class="price">$30.00</p>
+                <div id="i2" class="plan-details"><hr>
+                    <p>📈 Diario: <b>$1.66</b></p>
+                    <p>📅 Ciclo 60d: <b>$99.60</b></p>
+                    <button class="btn-activate" onclick="event.stopPropagation(); invertir(30)">ACTIVAR</button>
+                </div>
+            </div>
+            <div class="miner-card" onclick="toggleInfo('i3')">
+                <div style="font-size:1.5em">🥇</div><h4>Oro</h4><p class="price">$60.00</p>
+                <div id="i3" class="plan-details"><hr>
+                    <p>📈 Diario: <b>$3.00</b></p>
+                    <p>📅 Ciclo 60d: <b>$180.00</b></p>
+                    <button class="btn-activate" onclick="event.stopPropagation(); invertir(60)">ACTIVAR</button>
+                </div>
+            </div>
+            <div class="miner-card" onclick="toggleInfo('i4')">
+                <div style="font-size:1.5em">💎</div><h4>VIP</h4><p class="price">$100.00</p>
+                <div id="i4" class="plan-details"><hr>
+                    <p>📈 Diario: <b>$6.30</b></p>
+                    <p>📅 Ciclo 60d: <b>$378.00</b></p>
+                    <button class="btn-activate" onclick="event.stopPropagation(); invertir(100)">ACTIVAR</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="section-deposit" style="display:none;">
+        <div class="red-warning">⚠️ RED BEP20 (BSC)</div>
+        <div class="wallet-display"><code>0xd6fe607116c1df2b4dae56e77ffdae50cde9d153</code><button onclick="copyWallet()">COPIAR</button></div>
+        <input type="text" id="tx-hash" placeholder="Hash de Transacción">
+        <button class="btn-main" onclick="verifyTx()">NOTIFICAR DEPÓSITO</button>
+        <p id="verify-msg" style="display:none; color: #3fb950; text-align: center; margin-top: 10px; font-size: 0.9em;"></p>
+    </section>
+
+    <section id="section-withdraw" style="display:none;">
+        <div class="card"><small>Retirable</small><h2 id="withdraw-available">$0.00</h2></div>
+        <div class="red-warning" style="margin-top:10px; background:rgba(88,166,255,0.1); color:#58a6ff;">🕒 Solo 1 retiro cada 48 horas</div>
+        <input type="text" id="withdraw-wallet" placeholder="Dirección BEP20">
+        <input type="number" id="withdraw-amount" placeholder="Monto (Min $5)">
+        <button class="btn-main" style="background: #f85149;" onclick="procesarRetiro()">SOLICITAR RETIRO</button>
+    </section>
+
+    <section id="section-admin" style="display:none;">
+        <h3 style="color: #f7931a;">🛠 PANEL ADMIN</h3>
+        <div id="admin-solicitudes" class="plans-list"></div>
+    </section>
+
+    <nav class="bottom-nav">
+        <button onclick="nav('section-home')">🏠 Perfil</button>
+        <button onclick="nav('section-invest')">🚀 Invertir</button>
+        <button onclick="nav('section-deposit')">💰 Depósito</button>
+        <button onclick="nav('section-withdraw')">🏦 Retiro</button>
+        <button id="btn-admin-tab" onclick="nav('section-admin')" style="display:none; color: #f7931a;">🛠 Admin</button>
+    </nav>
+</div>
+<style>
+body { background: #0b0e14; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 15px; padding-bottom: 100px; }
+#app { max-width: 450px; margin: auto; }
+.profile-header { text-align: center; margin-bottom: 25px; }
+.avatar { font-size: 40px; background: #1c2128; width: 70px; height: 70px; line-height: 70px; border-radius: 50%; margin: 0 auto 10px; border: 2px solid #58a6ff; }
+.status-badge { background: #238636; font-size: 0.7em; padding: 5px 12px; border-radius: 20px; font-weight: bold; }
+.main-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.card { background: #161b22; padding: 15px; border-radius: 12px; border: 1px solid #30363d; text-align: center; }
+.plans-list { display: flex; flex-direction: column; gap: 8px; }
+.plan-item { background: #1c2128; border-left: 4px solid #f7931a; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 0.85em; }
+.historial-item { background: #161b22; border-left: 3px solid #30363d; padding: 10px; border-radius: 6px; display: flex; justify-content: space-between; font-size: 0.8em; align-items: center; }
+.invest-hero { background: linear-gradient(135deg, #f7931a, #ffab40); padding: 30px 20px; border-radius: 20px; text-align: center; margin-bottom: 25px; }
+.miner-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+.miner-card { background: #161b22; padding: 15px; border-radius: 18px; border: 1px solid #30363d; text-align: center; cursor: pointer; }
+.price { font-size: 1.1em; font-weight: bold; color: #f7931a; margin: 2px 0; }
+.plan-details { display: none; text-align: left; font-size: 0.75em; margin-top: 8px; }
+input { width: 100%; padding: 14px; margin: 10px 0; border-radius: 10px; border: 1px solid #30363d; background: #161b22; color: white; box-sizing: border-box; }
+button { font-weight: bold; border-radius: 10px; border: none; cursor: pointer; }
+.btn-activate { background: #f7931a; color: white; padding: 10px; width: 100%; margin-top: 5px; }
+.btn-main { background: #3fb950; color: white; padding: 15px; width: 100%; margin-top: 10px; }
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #161b22; display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid #30363d; z-index: 1000; }
+.bottom-nav button { background: transparent; color: #8b949e; width: auto; font-size: 0.7em; display: flex; flex-direction: column; align-items: center; }
+.wallet-display { background: #1c2128; padding: 12px; border-radius: 10px; border: 1px dashed #58a6ff; text-align: center; margin: 15px 0; font-size: 0.8em; }
+.red-warning { background: rgba(248, 81, 73, 0.1); color: #f85149; padding: 10px; border-radius: 8px; font-size: 0.75em; text-align: center; font-weight: bold; }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
+</body>
+</html>
