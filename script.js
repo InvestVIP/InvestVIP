@@ -4,11 +4,12 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const tg = window.Telegram.WebApp;
-tg.expand(); // Esto asegura que la app se abra en pantalla completa
+tg.expand(); // Pantalla completa en Telegram
 
+// Priorizar ID real de Telegram, si no, usar el de admin como respaldo
 const userId = tg.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : '8754466303';
 const userName = tg.initDataUnsafe?.user?.first_name || 'Usuario';
-const ADMIN_ID = "8754466303";
+const ADMIN_ID = "8754466303"; 
 
 // 2. NAVEGACIÓN
 function nav(id) {
@@ -18,15 +19,36 @@ function nav(id) {
     else cargarDatos();
 }
 
-// 3. CARGA DE DATOS USUARIO
+// 3. CARGA DE DATOS USUARIO (CON AUTO-REGISTRO)
 async function cargarDatos() {
     try {
-        if (userId === ADMIN_ID) document.getElementById('btn-admin-tab').style.display = 'flex';
+        if (userId === ADMIN_ID) {
+            const adminTab = document.getElementById('btn-admin-tab');
+            if (adminTab) adminTab.style.display = 'flex';
+        }
 
-        let { data: u } = await supabaseClient.from('usuarios').select('*').eq('id_telegram', userId).maybeSingle();
+        // Buscar usuario en la base de datos
+        let { data: u, error } = await supabaseClient.from('usuarios').select('*').eq('id_telegram', userId).maybeSingle();
+
+        // Si el usuario no existe, lo registramos automáticamente
+        if (!u && !error) {
+            console.log("Registrando nuevo usuario...");
+            const { data: nuevoU, error: insError } = await supabaseClient.from('usuarios').insert([
+                { 
+                    id_telegram: userId, 
+                    saldo_deposito: 0, 
+                    saldo_retirable: 0, 
+                    total_retirado: 0 
+                }
+            ]).select().single();
+            
+            if (insError) throw insError;
+            u = nuevoU;
+        }
+
         if (u) {
-            const saldoDep = u.saldo_deposito.toFixed(2);
-            const saldoRet = u.saldo_retirable.toFixed(2);
+            const saldoDep = (u.saldo_deposito || 0).toFixed(2);
+            const saldoRet = (u.saldo_retirable || 0).toFixed(2);
 
             document.getElementById('username').innerText = userName;
             document.getElementById('home-saldo-deposito').innerText = saldoDep;
@@ -38,35 +60,48 @@ async function cargarDatos() {
             if (depLabel) depLabel.innerText = "$" + saldoDep;
             if (retLabel) retLabel.innerText = "$" + saldoRet;
 
-            let { data: planes } = await supabaseClient.from('planes_activos').select('*').eq('id_telegram', userId).eq('activo', true);
-            const pDiv = document.getElementById('lista-planes');
-            let totalEstimadoDiario = 0;
-            pDiv.innerHTML = planes?.length ? "" : "<p style='color:#666; font-size:0.8em; padding:10px;'>Sin planes activos.</p>";
+            // Cargar planes activos
+            await actualizarPlanesVisuales();
             
-            planes?.forEach(p => {
-                totalEstimadoDiario += p.ganancia_diaria;
-                pDiv.innerHTML += `
-                    <div style="background:#1c2128; border-left:4px solid #f7931a; padding:12px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                        <div><strong>Plan ${p.nombre_plan}</strong><br><small style="color:#3fb950;">+$${p.ganancia_diaria.toFixed(2)} diario</small></div>
-                        <div style="text-align:right;"><span style="font-size:0.7em; color:#8b949e;">Invertido</span><br><b>$${p.monto_invertido}</b></div>
-                    </div>`;
-            });
-            document.getElementById('home-estimado-diario').innerText = "$" + totalEstimadoDiario.toFixed(2);
-
-            let { data: h } = await supabaseClient.from('solicitudes').select('*').eq('id_telegram', userId).neq('monto', 0).order('fecha', {ascending: false}).limit(10);
-            const hDiv = document.getElementById('lista-historial');
-            hDiv.innerHTML = "";
-            h?.forEach(s => {
-                let color = s.tipo === 'retiro' ? '#f85149' : (s.tipo === 'ganancia' ? '#58a6ff' : '#3fb950');
-                let extraIcon = s.detalles.includes('Automático') ? '⚡ ' : '';
-                
-                hDiv.innerHTML += `<div style="border-left:4px solid ${color}; background:#1c2128; margin-bottom:8px; padding:10px; border-radius:4px; display:flex; justify-content:space-between; align-items:center;">
-                    <div><strong style="font-size:0.8em; color:${color}">${extraIcon}${s.tipo.toUpperCase()}</strong><br><small style="color:#8b949e;">${new Date(s.fecha).toLocaleDateString()}</small></div>
-                    <div style="color:${color}; font-weight:bold;">${s.tipo === 'retiro' ? '-' : '+'}$${s.monto.toFixed(2)}</div>
-                </div>`;
-            });
+            // Cargar historial
+            await actualizarHistorialVisual();
         }
-    } catch (e) { console.error(e); }
+    } catch (e) { 
+        console.error("Error en cargarDatos:", e);
+    }
+}
+
+async function actualizarPlanesVisuales() {
+    let { data: planes } = await supabaseClient.from('planes_activos').select('*').eq('id_telegram', userId).eq('activo', true);
+    const pDiv = document.getElementById('lista-planes');
+    let totalEstimadoDiario = 0;
+    
+    pDiv.innerHTML = planes?.length ? "" : "<p style='color:#666; font-size:0.8em; padding:10px;'>Sin planes activos.</p>";
+    
+    planes?.forEach(p => {
+        totalEstimadoDiario += p.ganancia_diaria;
+        pDiv.innerHTML += `
+            <div style="background:#1c2128; border-left:4px solid #f7931a; padding:12px; border-radius:8px; display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <div><strong>Plan ${p.nombre_plan}</strong><br><small style="color:#3fb950;">+$${p.ganancia_diaria.toFixed(2)} diario</small></div>
+                <div style="text-align:right;"><span style="font-size:0.7em; color:#8b949e;">Invertido</span><br><b>$${p.monto_invertido}</b></div>
+            </div>`;
+    });
+    document.getElementById('home-estimado-diario').innerText = "$" + totalEstimadoDiario.toFixed(2);
+}
+
+async function actualizarHistorialVisual() {
+    let { data: h } = await supabaseClient.from('solicitudes').select('*').eq('id_telegram', userId).neq('monto', 0).order('fecha', {ascending: false}).limit(10);
+    const hDiv = document.getElementById('lista-historial');
+    hDiv.innerHTML = "";
+    h?.forEach(s => {
+        let color = s.tipo === 'retiro' ? '#f85149' : (s.tipo === 'ganancia' ? '#58a6ff' : '#3fb950');
+        let extraIcon = s.detalles.includes('Automático') ? '⚡ ' : '';
+        
+        hDiv.innerHTML += `<div style="border-left:4px solid ${color}; background:#1c2128; margin-bottom:8px; padding:10px; border-radius:4px; display:flex; justify-content:space-between; align-items:center;">
+            <div><strong style="font-size:0.8em; color:${color}">${extraIcon}${s.tipo.toUpperCase()}</strong><br><small style="color:#8b949e;">${new Date(s.fecha).toLocaleDateString()}</small></div>
+            <div style="color:${color}; font-weight:bold;">${s.tipo === 'retiro' ? '-' : '+'}$${s.monto.toFixed(2)}</div>
+        </div>`;
+    });
 }
 
 // 4. LÓGICA DE RETIRO 48H
@@ -150,7 +185,7 @@ async function gestionar(id, est, uT, mS, tip) {
         let r = parseFloat(prompt("Monto real a cargar:"));
         if (isNaN(r) || r <= 0) return;
         let { data: u } = await supabaseClient.from('usuarios').select('saldo_deposito').eq('id_telegram', uT).single();
-        await supabaseClient.from('usuarios').update({ saldo_deposito: u.saldo_deposito + r }).eq('id_telegram', uT);
+        await supabaseClient.from('usuarios').update({ saldo_deposito: (u.saldo_deposito || 0) + r }).eq('id_telegram', uT);
         await supabaseClient.from('solicitudes').update({ monto: r, estado: est }).eq('id', id);
     } else {
         let { data: u } = await supabaseClient.from('usuarios').select('*').eq('id_telegram', uT).single();
@@ -163,4 +198,5 @@ async function gestionar(id, est, uT, mS, tip) {
 
 function copyWallet() { navigator.clipboard.writeText("0xd6fe607116c1df2b4dae56e77ffdae50cde9d153"); alert("Copiada."); }
 
+// Iniciar app
 cargarDatos();
