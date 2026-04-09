@@ -35,15 +35,10 @@
                 <div id="home-estimado-diario" class="price-neon">$0.00</div>
             </div>
 
-            <div class="card-total-retirado">
-                <small class="balance-label">Total Retirado</small>
-                <div class="price" id="home-total-retirado" style="color:#f85149;">$0.00</div>
-            </div>
-
             <h4 class="section-title">📦 MIS PLANES ACTIVOS</h4>
             <div id="lista-planes"></div>
 
-            <h4 class="section-title">📑 HISTORIAL DE ACTIVIDAD</h4>
+            <h4 class="section-title">📑 HISTORIAL RECIENTE</h4>
             <div id="lista-historial"></div>
         </section>
 
@@ -51,31 +46,31 @@
             <h3 class="title-center">Minería de Activos</h3>
             <div class="miner-grid">
                 <div class="miner-card bronze" onclick="invertir(11)">
-                    <div class="plan-icon">🥉</div>
+                    <span class="plan-icon">🥉</span>
                     <div class="balance-label">BRONCE</div>
                     <div class="price">$11</div>
-                    <div class="plan-stats">Diario: $0.65<br>Total: $39.00</div>
+                    <div class="plan-stats">Retorno: $0.65/día<br>Contrato: 60 Días</div>
                     <button class="btn-activate">ACTIVAR</button>
                 </div>
                 <div class="miner-card silver" onclick="invertir(30)">
-                    <div class="plan-icon">🥈</div>
+                    <span class="plan-icon">🥈</span>
                     <div class="balance-label">PLATA</div>
                     <div class="price">$30</div>
-                    <div class="plan-stats">Diario: $1.66<br>Total: $99.60</div>
+                    <div class="plan-stats">Retorno: $1.66/día<br>Contrato: 60 Días</div>
                     <button class="btn-activate">ACTIVAR</button>
                 </div>
                 <div class="miner-card gold" onclick="invertir(60)">
-                    <div class="plan-icon">🥇</div>
+                    <span class="plan-icon">🥇</span>
                     <div class="balance-label">ORO</div>
                     <div class="price">$60</div>
-                    <div class="plan-stats">Diario: $3.00<br>Total: $180.00</div>
+                    <div class="plan-stats">Retorno: $3.00/día<br>Contrato: 60 Días</div>
                     <button class="btn-activate">ACTIVAR</button>
                 </div>
                 <div class="miner-card vip" onclick="invertir(120)">
-                    <div class="plan-icon">💎</div>
+                    <span class="plan-icon">💎</span>
                     <div class="balance-label">VIP</div>
                     <div class="price">$120</div>
-                    <div class="plan-stats">Diario: $6.30<br>Total: $378.00</div>
+                    <div class="plan-stats">Retorno: $6.30/día<br>Contrato: 60 Días</div>
                     <button class="btn-activate">ACTIVAR</button>
                 </div>
             </div>
@@ -84,18 +79,29 @@
         <section id="section-deposit" style="display:none;">
             <h3 class="title-center">Recargar Saldo</h3>
             <div class="alert-box info">⚠️ Solo Red BEP20 (USDT)</div>
+            
+            <div class="input-group">
+                <label class="balance-label">Monto enviado (USDT)</label>
+                <input type="number" id="dep-amount" placeholder="0.00">
+            </div>
+
             <div class="copy-container" onclick="copyWallet()">
                 <div class="copy-label">DIRECCIÓN USDT (BEP20)</div>
                 <code id="wallet-addr">0xd6fe607116c1df2b4dae56e77ffdae50cde9d153</code>
                 <div class="copy-btn">TOCA PARA COPIAR</div>
             </div>
-            <input type="text" id="tx-hash" placeholder="Pega el Hash o ID de transacción">
+
+            <div class="input-group">
+                <label class="balance-label">Hash de Transacción</label>
+                <input type="text" id="tx-hash" placeholder="Pega el hash aquí">
+            </div>
+            
             <button class="btn-main" onclick="verifyTx()">INFORMAR PAGO</button>
         </section>
 
         <section id="section-withdraw" style="display:none;">
             <h3 class="title-center">Retirar Ganancias</h3>
-            <div class="card" style="border-color:#f85149">
+            <div class="card">
                 <small class="balance-label">Disponible:</small>
                 <div class="price" id="withdraw-available" style="font-size:1.8em">$0.00</div>
             </div>
@@ -105,10 +111,10 @@
         </section>
 
         <section id="section-admin" style="display:none;">
-            <h3 class="title-center">Panel Admin</h3>
+            <h3 class="title-center">Panel Maestro</h3>
             <div class="admin-grid-layout">
                 <div class="admin-column">
-                    <h4 class="admin-header">📥 DEPOSITOS</h4>
+                    <h4 class="admin-header">📥 DEPÓSITOS</h4>
                     <div id="admin-dep-list"></div>
                 </div>
                 <div class="admin-column">
