@@ -79,15 +79,13 @@
         <section id="section-deposit" style="display:none;">
             <h3 class="title-center">Cargar Saldo</h3>
             <div class="alert-box info">⚠️ Solo Red BEP20 (BNB Smart Chain)</div>
-            
             <div class="copy-container" onclick="copyText('0xd6fe607116c1df2b4dae56e77ffdae50cde9d153')">
                 <div class="copy-label">DIRECCIÓN USDT (BEP20)</div>
                 <div class="copy-value">0xd6fe607116...d153</div>
                 <div class="copy-btn">TOCA PARA COPIAR</div>
             </div>
-
             <input type="number" id="dep-amount" placeholder="Monto enviado">
-            <input type="text" id="tx-hash" placeholder="Hash o ID de transacción">
+            <input type="text" id="tx-hash" placeholder="Hash de transacción">
             <button class="btn-main" onclick="verifyTx()">PROCESAR DEPÓSITO</button>
             <div id="status-depositos" style="margin-top:10px;"></div>
         </section>
@@ -112,14 +110,10 @@
                     <div id="admin-ret-list"></div>
                 </div>
             </div>
-            <h4 class="section-title">🔄 PROCESADOS (HISTORIAL)</h4>
+            <h4 class="section-title">🔄 HISTORIAL PROCESADOS</h4>
             <div class="admin-grid">
-                <div class="admin-col">
-                    <div id="admin-hist-dep" class="hist-container"></div>
-                </div>
-                <div class="admin-col">
-                    <div id="admin-hist-ret" class="hist-container"></div>
-                </div>
+                <div class="admin-col" id="admin-hist-dep"></div>
+                <div class="admin-col" id="admin-hist-ret"></div>
             </div>
         </section>
 
