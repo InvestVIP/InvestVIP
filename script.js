@@ -84,13 +84,11 @@ async function invertir(costo) {
     } else alert("Saldo insuficiente.");
 }
 
-// MODIFICACIÓN: RESTRICCIÓN 48 HORAS
 async function procesarRetiro() {
     const monto = parseFloat(document.getElementById('withdraw-amount').value);
     const wallet = document.getElementById('withdraw-wallet').value;
     if (!wallet || monto < 5) return alert("Monto mínimo $5.");
 
-    // Consultar último retiro
     let { data: ultimaSol } = await supabaseClient.from('solicitudes').select('fecha').eq('id_telegram', userId).eq('tipo', 'retiro').order('fecha', { ascending: false }).limit(1);
     
     if (ultimaSol?.length > 0) {
@@ -107,39 +105,53 @@ async function procesarRetiro() {
     } else alert("Saldo insuficiente.");
 }
 
-// MODIFICACIÓN: ADMIN DIFERENCIADO
+// ADMIN ACTUALIZADO PARA LAS DOS SUB-COLUMNAS
 async function cargarAdmin() {
     const depDiv = document.getElementById('admin-dep-list');
     const retDiv = document.getElementById('admin-ret-list');
     const procDiv = document.getElementById('admin-historial-procesados');
-    depDiv.innerHTML = ""; retDiv.innerHTML = ""; procDiv.innerHTML = "";
+    
+    // Reiniciar contenedores manteniendo el label de cabecera
+    depDiv.innerHTML = '<small style="color: #3fb950; display: block; text-align: center; margin-bottom: 5px; font-weight: bold;">DEPÓSITOS</small>'; 
+    retDiv.innerHTML = '<small style="color: #f85149; display: block; text-align: center; margin-bottom: 5px; font-weight: bold;">RETIROS</small>'; 
+    procDiv.innerHTML = "";
 
     let { data: pendientes } = await supabaseClient.from('solicitudes').select('*').eq('estado', 'pendiente');
     
     pendientes?.forEach(s => {
         const esDep = s.tipo === 'deposito';
+        const color = esDep ? '#3fb950' : '#f85149';
         const item = `
-            <div class="admin-card-mini" style="border-left: 4px solid ${esDep ? '#3fb950' : '#f85149'}">
-                <span style="color:${esDep ? '#3fb950' : '#f85149'}; font-weight:bold;">${s.tipo.toUpperCase()}</span><br>
-                <small>${s.id_telegram}</small><br>
-                <strong>$${s.monto}</strong><br>
-                <button onclick="gestionarSolicitud('${s.id}','${s.tipo}',${s.monto},'${s.id_telegram}')">APROBAR</button>
+            <div class="admin-card-mini" style="border-left: 4px solid ${color}; background: #161b22; padding: 10px; margin-bottom: 8px; border-radius: 4px;">
+                <div style="display:flex; justify-content:space-between; font-size:0.75em; color:#8b949e; margin-bottom:5px;">
+                    <span>ID: ${s.id_telegram.slice(-5)}</span>
+                    <span style="color:${color}">${s.tipo.toUpperCase()}</span>
+                </div>
+                <strong style="font-size:1.1em; color:#e6edf3;">$${s.monto.toFixed(2)}</strong>
+                <button style="background:${color}; width:100%; border:none; color:white; padding:6px; margin-top:8px; border-radius:4px; font-weight:bold; cursor:pointer;" 
+                        onclick="gestionarSolicitud('${s.id}','${s.tipo}',${s.monto},'${s.id_telegram}')">
+                    APROBAR
+                </button>
             </div>`;
+        
         if(esDep) depDiv.innerHTML += item; else retDiv.innerHTML += item;
     });
 
-    let { data: procesados } = await supabaseClient.from('solicitudes').select('*').neq('estado', 'pendiente').order('fecha', {ascending: false}).limit(20);
+    let { data: procesados } = await supabaseClient.from('solicitudes').select('*').neq('estado', 'pendiente').order('fecha', {ascending: false}).limit(30);
     procesados?.forEach(p => {
         const color = p.tipo === 'deposito' ? '#3fb950' : '#f85149';
-        procDiv.innerHTML += `<div style="border-bottom:1px solid #333; margin-bottom:5px; font-size:0.85em;">
-            <span style="color:${color}">${p.tipo==='deposito'?'📥':'📤'}</span> $${p.monto} - ${p.estado}<br>
-            <small>${p.id_telegram}</small>
-        </div>`;
+        procDiv.innerHTML += `
+            <div style="border-bottom:1px solid #30363d; padding:8px 0; font-size:0.85em;">
+                <span style="color:${color}">${p.tipo==='deposito'?'📥':'📤'}</span> 
+                <strong style="color:#e6edf3;">$${p.monto.toFixed(2)}</strong>
+                <span style="color:#8b949e; float:right;">${p.estado}</span><br>
+                <small style="color:#484f58;">User: ${p.id_telegram}</small>
+            </div>`;
     });
 }
 
 async function gestionarSolicitud(id, tipo, monto, targetUid) {
-    if (!confirm("¿Aprobar transacción?")) return;
+    if (!confirm(`¿Confirmar aprobación de ${tipo} por $${monto}?`)) return;
     try {
         let { data: user } = await supabaseClient.from('usuarios').select('*').eq('id_telegram', targetUid).single();
         if (tipo === 'deposito') {
@@ -148,17 +160,19 @@ async function gestionarSolicitud(id, tipo, monto, targetUid) {
             await supabaseClient.from('usuarios').update({ saldo_retirable: (user.saldo_retirable || 0) - monto }).eq('id_telegram', targetUid);
         }
         await supabaseClient.from('solicitudes').update({ estado: 'completado' }).eq('id', id);
-        alert("Éxito"); cargarAdmin();
-    } catch (e) { alert("Error"); }
+        alert("Transacción procesada correctamente."); 
+        cargarAdmin();
+    } catch (e) { alert("Error al actualizar saldos."); }
 }
 
 async function verifyTx() {
     const hash = document.getElementById('tx-hash').value;
     const monto = parseFloat(document.getElementById('dep-amount').value) || 0;
-    if (hash.length < 5) return alert("Hash inválido.");
+    if (hash.length < 5 || monto <= 0) return alert("Hash o monto inválido.");
     await supabaseClient.from('solicitudes').insert([{ id_telegram: userId, tipo: 'deposito', detalles: hash, estado: 'pendiente', monto: monto }]);
-    alert("Informado."); nav('section-home');
+    alert("Depósito informado. Espera la validación del administrador."); 
+    nav('section-home');
 }
 
-function copyWallet() { navigator.clipboard.writeText("0xd6fe607116c1df2b4dae56e77ffdae50cde9d153"); alert("Copiado"); }
+function copyWallet() { navigator.clipboard.writeText("0xd6fe607116c1df2b4dae56e77ffdae50cde9d153"); alert("Billetera copiada"); }
 document.addEventListener('DOMContentLoaded', iniciarApp);
