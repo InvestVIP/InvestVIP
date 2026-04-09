@@ -3,10 +3,12 @@ const SUPABASE_URL = 'https://udoyasqceikatyxizodm.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVkb3lhc3FjZWlrYXR5eGl6b2RtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU2ODkxODgsImV4cCI6MjA5MTI2NTE4OH0.LTV9coVwGdlvaiTOaLy35Bn9SHzjiSXliZOEYDOBqoE'; 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const tg = window.Telegram?.WebApp;
-const userId = String(tg?.initDataUnsafe?.user?.id || '8754466303');
-const userName = tg?.initDataUnsafe?.user?.first_name || 'Admin PC';
-const ADMIN_ID = "8754466303"; 
+const tg = window.Telegram.WebApp;
+tg.expand(); // Esto asegura que la app se abra en pantalla completa
+
+const userId = tg.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : '8754466303';
+const userName = tg.initDataUnsafe?.user?.first_name || 'Usuario';
+const ADMIN_ID = "8754466303";
 
 // 2. NAVEGACIÓN
 function nav(id) {
