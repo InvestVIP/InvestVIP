@@ -1,48 +1,37 @@
-body { background: #0b0e14; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 15px; padding-bottom: 100px; }
+body { background: #0b0e14; color: white; font-family: sans-serif; margin: 0; padding: 15px; padding-bottom: 90px; }
 #app { max-width: 450px; margin: auto; }
+.profile-header { text-align: center; margin-bottom: 20px; }
+.avatar { font-size: 40px; background: #1c2128; width: 70px; height: 70px; border-radius: 50%; line-height: 70px; margin: auto; border: 2px solid #58a6ff; }
+.status-badge { background: #238636; font-size: 0.7em; padding: 3px 10px; border-radius: 20px; }
 
-/* PERFIL */
-.profile-header { text-align: center; margin-bottom: 25px; }
-.avatar { font-size: 40px; background: #1c2128; width: 70px; height: 70px; line-height: 70px; border-radius: 50%; margin: 0 auto 10px; border: 2px solid #58a6ff; }
-.status-badge { background: #238636; font-size: 0.7em; padding: 5px 12px; border-radius: 20px; font-weight: bold; }
-
-.main-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.card, .card-estimate, .card-total-retirado { background: #161b22; padding: 15px; border-radius: 12px; border: 1px solid #30363d; text-align: center; margin-bottom: 10px; }
-.card-estimate { border-color: #00ffcc; box-shadow: 0 0 10px rgba(0,255,204,0.1); margin-top: 10px; }
-.price-neon { font-size: 2.2em; font-weight: 800; color: #00ffcc; text-shadow: 0 0 10px rgba(0,255,204,0.3); }
+.main-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.card, .card-estimate { background: #161b22; padding: 15px; border-radius: 12px; border: 1px solid #30363d; text-align: center; }
+.card-estimate { margin-top: 10px; border-color: #00ffcc; }
+.price-neon { font-size: 2em; color: #00ffcc; font-weight: bold; }
 .price { font-size: 1.2em; font-weight: bold; color: #f7931a; }
-.balance-label { font-size: 0.7em; color: #8b949e; text-transform: uppercase; letter-spacing: 1px; }
+.balance-label { font-size: 0.7em; color: #8b949e; text-transform: uppercase; }
 
-/* INVERTIR */
-.miner-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.miner-card { background: #161b22; padding: 20px 10px; border-radius: 18px; border: 1px solid #30363d; text-align: center; }
-.plan-icon { font-size: 2.5em; margin-bottom: 5px; }
-.plan-stats { font-size: 0.75em; color: #3fb950; margin: 10px 0; background: #0b0e14; padding: 8px; border-radius: 8px; }
+.miner-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.miner-card { background: #161b22; padding: 15px; border-radius: 15px; border: 1px solid #30363d; text-align: center; }
+.plan-icon { font-size: 2.5em; display: block; }
+.plan-stats { font-size: 0.75em; color: #3fb950; margin: 10px 0; }
 
-/* COLORES PLANES */
+.status-item { background: #1c2128; padding: 10px; margin-bottom: 8px; border-radius: 8px; display: flex; justify-content: space-between; border: 1px solid #30363d; font-size: 0.85em; }
 .border-bronce { border-left: 5px solid #cd7f32; }
 .border-plata { border-left: 5px solid #c0c0c0; }
 .border-oro { border-left: 5px solid #ffd700; }
 .border-vip { border-left: 5px solid #00ffcc; }
 
-/* UI ELEMENTS */
-.section-title { font-size: 0.75em; color: #8b949e; margin: 20px 0 10px; }
-.status-item { background: #1c2128; padding: 12px; margin-bottom: 8px; border-radius: 10px; border: 1px solid #30363d; display: flex; justify-content: space-between; align-items: center; }
-.alert-box { padding: 10px; border-radius: 8px; font-size: 0.75em; text-align: center; margin-bottom: 15px; }
-.alert-box.info { background: rgba(88, 166, 255, 0.1); color: #58a6ff; border: 1px solid #58a6ff; }
-.copy-container { background: #1c2128; border: 2px dashed #58a6ff; padding: 15px; border-radius: 12px; text-align: center; cursor: pointer; margin-bottom: 15px; }
-.copy-label { font-size: 0.6em; color: #8b949e; }
-.copy-btn { color: #58a6ff; font-size: 0.7em; font-weight: bold; margin-top: 5px; }
-
-/* ADMIN COLUMNAS */
 .admin-grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.admin-header { font-size: 0.7em; text-align: center; color: #58a6ff; border-bottom: 1px solid #30363d; padding-bottom: 5px; }
-.admin-card-mini { background: #1c2128; padding: 8px; border-radius: 8px; border: 1px solid #30363d; font-size: 0.7em; margin-bottom: 8px; }
-.admin-card-mini button { background: #3fb950; color: white; border: none; padding: 4px; width: 100%; border-radius: 4px; margin-top: 5px; }
+.admin-header { font-size: 0.7em; color: #58a6ff; text-align: center; border-bottom: 1px solid #30363d; }
+.admin-card-mini { background: #1c2128; padding: 8px; border-radius: 8px; font-size: 0.7em; margin-bottom: 8px; border: 1px solid #333; }
+.admin-card-mini button { background: #3fb950; border: none; color: white; width: 100%; border-radius: 4px; padding: 4px; margin-top: 5px; }
 
-/* NAV & BUTTONS */
-input { width: 100%; padding: 14px; margin: 10px 0; border-radius: 10px; border: 1px solid #30363d; background: #161b22; color: white; box-sizing: border-box; }
-.btn-activate { background: #f7931a; color: white; padding: 10px; width: 100%; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
-.btn-main { background: #3fb950; color: white; padding: 15px; width: 100%; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
-.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #161b22; display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid #30363d; }
-.bottom-nav button { background: transparent; color: #8b949e; border: none; font-size: 0.75em; display: flex; flex-direction: column; align-items: center; }
+.copy-container { background: #1c2128; border: 1px dashed #58a6ff; padding: 10px; border-radius: 10px; text-align: center; margin: 15px 0; cursor: pointer; }
+.alert-box { background: rgba(88, 166, 255, 0.1); color: #58a6ff; padding: 10px; border-radius: 8px; font-size: 0.8em; margin-bottom: 15px; }
+
+input { width: 100%; padding: 12px; margin: 5px 0 15px; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 8px; box-sizing: border-box; }
+.btn-activate { background: #f7931a; color: white; width: 100%; border: none; padding: 8px; border-radius: 8px; font-weight: bold; }
+.btn-main { background: #3fb950; color: white; width: 100%; border: none; padding: 15px; border-radius: 10px; font-weight: bold; }
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #161b22; display: flex; justify-content: space-around; padding: 10px; border-top: 1px solid #30363d; }
+.bottom-nav button { background: transparent; color: #8b949e; border: none; font-size: 0.7em; }
