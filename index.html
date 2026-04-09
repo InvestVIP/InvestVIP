@@ -16,7 +16,7 @@
             <div class="profile-header">
                 <div class="avatar">👤</div>
                 <h2 id="username">Cargando...</h2>
-                <span class="status-badge">Usuario Verificado</span>
+                <span class="status-badge">Verificado</span>
             </div>
 
             <div class="main-cards">
@@ -43,7 +43,7 @@
             <h4 class="section-title">📦 MIS PLANES ACTIVOS</h4>
             <div id="lista-planes"></div>
 
-            <h4 class="section-title">📑 HISTORIAL RECIENTE</h4>
+            <h4 class="section-title">📑 HISTORIAL DE ACTIVIDAD</h4>
             <div id="lista-historial"></div>
         </section>
 
@@ -92,18 +92,18 @@
             <input type="number" id="dep-amount" placeholder="Monto depositado (Ej: 11)">
             <input type="text" id="tx-hash" placeholder="Hash: 0x7a2... (ID Transacción)">
             <button class="btn-main" onclick="verifyTx()">PROCESAR DEPÓSITO</button>
-            <h4 class="section-title">MIS SOLICITUDES</h4>
+            <h4 class="section-title">ESTADO DE DEPÓSITOS</h4>
             <div id="status-depositos"></div>
         </section>
 
         <section id="section-withdraw" style="display:none;">
             <h3 class="title-center">Retirar Ganancias</h3>
             <div class="card">
-                <small class="balance-label">Disponible</small>
+                <small class="balance-label">Disponible para Retiro</small>
                 <div class="price" id="withdraw-available" style="font-size: 1.8em;">$0.00</div>
             </div>
             <input type="number" id="withdraw-amount" placeholder="Monto (Min $5)">
-            <input type="text" id="withdraw-wallet" placeholder="Billetera USDT BEP20">
+            <input type="text" id="withdraw-wallet" placeholder="Dirección Billetera BEP20">
             <button class="btn-main" onclick="procesarRetiro()" style="background:#f85149;">PROCESAR RETIRO</button>
             <h4 class="section-title">ESTADO DE RETIROS</h4>
             <div id="status-retiros"></div>
@@ -121,7 +121,7 @@
                     <div id="admin-ret-list"></div>
                 </div>
             </div>
-            <h4 class="section-title">ÚLTIMOS APROBADOS</h4>
+            <h4 class="section-title">🔄 LOG GLOBAL DE APROBADOS</h4>
             <div id="admin-global-log"></div>
         </section>
 
