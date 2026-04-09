@@ -177,3 +177,46 @@ function copyWallet() {
 
 // ARRANQUE AUTOMÁTICO
 cargarDatos();
+// 7. FUNCIÓN DE INVERSIÓN (MEDALLAS)
+async function invertir(costo) {
+    try {
+        // 1. Verificar si el usuario tiene saldo en "Disponible"
+        let { data: u } = await supabaseClient.from('usuarios').select('*').eq('id_telegram', userId).single();
+        
+        if (u && u.saldo_deposito >= costo) {
+            let nombre = (costo===11)?"Bronce":(costo===30)?"Plata":(costo===60)?"Oro":"VIP";
+            let ganancia = (costo===11)?0.65:(costo===30)?1.66:(costo===60)?3.00:6.30;
+
+            // 2. Descontar saldo de la cuenta de depósito
+            await supabaseClient.from('usuarios').update({ 
+                saldo_deposito: u.saldo_deposito - costo 
+            }).eq('id_telegram', userId);
+
+            // 3. Registrar el nuevo plan activo
+            await supabaseClient.from('planes_activos').insert([{ 
+                id_telegram: userId, 
+                nombre_plan: nombre, 
+                monto_invertido: costo, 
+                ganancia_diaria: ganancia,
+                activo: true 
+            }]);
+
+            // 4. Crear un registro en el historial como 'inversion' o 'ganancia' inicial (opcional)
+            await supabaseClient.from('solicitudes').insert([{
+                id_telegram: userId,
+                tipo: 'ganancia',
+                monto: 0,
+                detalles: `Activación Plan ${nombre}`,
+                estado: 'completado'
+            }]);
+
+            alert(`🚀 ¡Felicidades! Plan ${nombre} activado.`);
+            cargarDatos(); // Refrescar la interfaz
+        } else {
+            alert("❌ Saldo insuficiente en la cuenta de depósito.");
+        }
+    } catch (e) {
+        console.error("Error en inversión:", e);
+        alert("Hubo un error al procesar la inversión.");
+    }
+}
