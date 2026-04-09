@@ -4,7 +4,7 @@ let supabaseClient;
 const tg = window.Telegram.WebApp;
 
 const userId = tg.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : '8754466303';
-const userName = tg.initDataUnsafe?.user?.first_name || 'Usuario';
+const userName = tg.initDataUnsafe?.user?.first_name || 'Inversionista';
 
 function iniciarApp() {
     if (!window.supabase) { setTimeout(iniciarApp, 100); return; }
@@ -49,16 +49,16 @@ async function invertir(costo, nombre, ganancia) {
             id_telegram: userId, nombre_plan: nombre, monto_invertido: costo, 
             ganancia_diaria: ganancia, activo: true, ultima_bonificacion: new Date().toISOString() 
         }]);
-        alert("🚀 Plan " + nombre + " Activado! El minero ha salido a trabajar.");
+        alert("🚀 ¡Plan " + nombre + " Activado! Tu minero ha comenzado a operar.");
         nav('section-home');
-    } else alert("Saldo insuficiente en depósito.");
+    } else alert("❌ Saldo de depósito insuficiente.");
 }
 
 async function verifyTx() {
     const hash = document.getElementById('tx-hash').value;
-    const monto = parseFloat(document.getElementById('dep-amount').value);
-    if (hash.length < 5 || isNaN(monto)) return alert("Complete los campos correctamente.");
-    await supabaseClient.from('solicitudes').insert([{ id_telegram: userId, tipo: 'deposito', detalles: hash, estado: 'pendiente', monto: monto }]);
+    const montoDeclarado = parseFloat(document.getElementById('dep-amount').value);
+    if (hash.length < 5 || isNaN(montoDeclarado)) return alert("Por favor ingresa monto y hash válido.");
+    await supabaseClient.from('solicitudes').insert([{ id_telegram: userId, tipo: 'deposito', detalles: hash, estado: 'pendiente', monto: montoDeclarado }]);
     alert("⌛ Procesando Deposito en red Bep20, Verifique en Historial al ser procesado");
     nav('section-home');
 }
@@ -70,7 +70,7 @@ async function procesarRetiro() {
     let { data: u } = await supabaseClient.from('usuarios').select('saldo_retirable').eq('id_telegram', userId).single();
     if (u?.saldo_retirable >= monto) {
         await supabaseClient.from('solicitudes').insert([{ id_telegram: userId, tipo: 'retiro', monto: monto, detalles: wallet, estado: 'pendiente' }]);
-        alert("✅ Solicitud enviada. Consulte estado en historial.");
+        alert("✅ ¡Retiro en proceso de verificacion! Consulte en historial.");
         nav('section-home');
     } else alert("Saldo insuficiente.");
 }
@@ -88,7 +88,7 @@ async function actualizarMisPlanes() {
 }
 
 async function actualizarHistorialHome() {
-    // Filtrar para que solo salgan depósitos, retiros y ganancias > 0
+    // Filtrar para que no salgan registros de ganancia en 0.00
     let { data: h } = await supabaseClient.from('solicitudes').select('*').eq('id_telegram', userId).neq('monto', 0).order('fecha', {ascending: false}).limit(10);
     const div = document.getElementById('lista-historial'); div.innerHTML = "";
     h?.forEach(s => {
@@ -106,7 +106,7 @@ async function cargarStatusLocal(tipo, divId) {
     });
 }
 
-// ADMIN LOGIC
+// FUNCIONES ADMIN MEJORADAS
 async function cargarAdmin() {
     const dList = document.getElementById('admin-dep-list');
     const rList = document.getElementById('admin-ret-list');
@@ -115,31 +115,37 @@ async function cargarAdmin() {
 
     let { data: pend } = await supabaseClient.from('solicitudes').select('*').eq('estado', 'pendiente');
     pend?.forEach(s => {
-        const item = `<div class="admin-card-mini"><small>ID: ${s.id_telegram}</small><br><b onclick="copyText('${s.detalles}')" style="color:#58a6ff;cursor:pointer">📋 VER INFO</b><br>${s.tipo==='retiro'?'RET: $'+s.monto:'DEP: $'+s.monto}<br><button onclick="gestionarAdmin('${s.id}','${s.id_telegram}','${s.tipo}',${s.monto})">APROBAR</button></div>`;
+        const item = `<div class="admin-card-mini">
+            <small>ID: ${s.id_telegram}</small><br>
+            <b onclick="copyText('${s.detalles}')" style="color:#58a6ff; cursor:pointer">📋 COPIAR DATOS</b><br>
+            ${s.tipo==='retiro'?'RET: $'+s.monto:'DEP: $'+s.monto}<br>
+            <button onclick="gestionarAdmin('${s.id}','${s.id_telegram}','${s.tipo}',${s.monto})">PROCESAR</button>
+        </div>`;
         if(s.tipo === 'deposito') dList.innerHTML += item; else rList.innerHTML += item;
     });
 
-    let { data: h } = await supabaseClient.from('solicitudes').select('*').neq('estado', 'pendiente').order('fecha', {ascending: false}).limit(10);
-    h?.forEach(s => {
-        gList.innerHTML += `<div class="status-item"><small>${s.id_telegram}</small><strong>$${s.monto} (${s.tipo})</strong><small style="color:#3fb950">OK</small></div>`;
+    // Cargar Log Global de aprobados
+    let { data: log } = await supabaseClient.from('solicitudes').select('*').neq('estado', 'pendiente').order('fecha', {ascending: false}).limit(10);
+    log?.forEach(l => {
+        gList.innerHTML += `<div class="status-item"><small>${l.id_telegram}</small><strong>$${l.monto} (${l.tipo})</strong><small style="color:#3fb950">APROBADO</small></div>`;
     });
 }
 
 async function gestionarAdmin(id, userT, tipo, montoOri) {
     if (tipo === 'deposito') {
-        let real = parseFloat(prompt("Validar monto real a acreditar:", montoOri));
-        if (!real) return;
+        let real = parseFloat(prompt("Validar monto REAL a acreditar (Usuario dijo: $" + montoOri + "):", montoOri));
+        if (isNaN(real) || real <= 0) return;
         let { data: u } = await supabaseClient.from('usuarios').select('saldo_deposito').eq('id_telegram', userT).single();
         await supabaseClient.from('usuarios').update({ saldo_deposito: (u.saldo_deposito || 0) + real }).eq('id_telegram', userT);
         await supabaseClient.from('solicitudes').update({ monto: real, estado: 'completado', fecha: new Date().toISOString() }).eq('id', id);
     } else {
-        let hash = prompt("Pegar Hash de Pago Realizado:");
+        let hash = prompt("Ingresa el HASH de pago realizado para el usuario:");
         if (!hash) return;
         let { data: u } = await supabaseClient.from('usuarios').select('*').eq('id_telegram', userT).single();
         await supabaseClient.from('usuarios').update({ saldo_retirable: u.saldo_retirable - montoOri, total_retirado: (u.total_retirado || 0) + montoOri }).eq('id_telegram', userT);
         await supabaseClient.from('solicitudes').update({ detalles: hash, estado: 'completado', fecha: new Date().toISOString() }).eq('id', id);
     }
-    alert("Operación completada."); cargarAdmin();
+    alert("Operación completada con éxito."); cargarAdmin();
 }
 
 async function procesarPagosDiarios() {
@@ -155,5 +161,5 @@ async function procesarPagosDiarios() {
     }
 }
 
-function copyText(txt) { navigator.clipboard.writeText(txt); alert("✅ Copiado"); }
+function copyText(txt) { navigator.clipboard.writeText(txt); alert("✅ Copiado al portapapeles"); }
 document.addEventListener('DOMContentLoaded', iniciarApp);
