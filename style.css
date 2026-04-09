@@ -1,201 +1,47 @@
-/* ESTILOS BASE */
-body { 
-    background: #0b0e14; 
-    color: white; 
-    font-family: 'Segoe UI', sans-serif; 
-    margin: 0; 
-    padding: 15px; 
-    padding-bottom: 100px; 
-}
+body { background: #0b0e14; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 15px; padding-bottom: 100px; }
+#app { max-width: 450px; margin: auto; }
+.profile-header { text-align: center; margin-bottom: 25px; }
+.avatar { font-size: 40px; background: #1c2128; width: 70px; height: 70px; line-height: 70px; border-radius: 50%; margin: 0 auto 10px; border: 2px solid #58a6ff; }
+.status-badge { background: #238636; font-size: 0.7em; padding: 5px 12px; border-radius: 20px; font-weight: bold; }
 
-#app { 
-    max-width: 450px; 
-    margin: auto; 
-}
+/* TARJETAS */
+.main-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.card, .card-special { background: #161b22; padding: 15px; border-radius: 12px; border: 1px solid #30363d; text-align: center; }
+.card-special { border-color: #3fb950; margin-top: 12px; }
+.price { font-size: 1.3em; font-weight: bold; color: #f7931a; }
+.price-green { font-size: 1.5em; font-weight: bold; color: #3fb950; }
+.price-neon { color: #00ffcc; font-weight: bold; font-size: 0.9em; }
+.balance-label { font-size: 0.7em; color: #8b949e; text-transform: uppercase; letter-spacing: 1px; }
 
-/* PANTALLA PRINCIPAL Y BALANCE */
-.balance-display { 
-    font-size: 2.2em; 
-    font-weight: 800; 
-    color: #ffffff; 
-    text-shadow: 0 0 15px rgba(247, 147, 26, 0.2); 
-    margin: 5px 0; 
-    text-align: center;
-}
+/* HISTORIALES Y LISTAS */
+.section-title { font-size: 0.75em; color: #8b949e; margin: 25px 0 10px; }
+.status-item { background: #1c2128; padding: 12px; margin-bottom: 8px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #30363d; font-size: 0.85em; }
 
-.balance-label { 
-    font-size: 0.75em; 
-    color: #8b949e; 
-    text-transform: uppercase; 
-    letter-spacing: 1px; 
-}
+/* PLANES */
+.border-bronze { border-left: 5px solid #cd7f32; }
+.border-silver { border-left: 5px solid #c0c0c0; }
+.border-gold { border-left: 5px solid #ffd700; }
+.border-vip { border-left: 5px solid #00ffcc; }
 
-.profile-header { 
-    text-align: center; 
-    margin-bottom: 25px; 
-}
+/* INVERTIR */
+.miner-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.miner-card { background: #161b22; padding: 15px; border-radius: 18px; border: 1px solid #30363d; text-align: center; }
+.plan-icon { font-size: 3.2em; margin-bottom: 5px; }
+.plan-stats { font-size: 0.7em; color: #3fb950; margin: 8px 0; line-height: 1.4; }
+.btn-activate { background: #f7931a; color: white; width: 100%; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; }
 
-.avatar { 
-    font-size: 40px; 
-    background: #1c2128; 
-    width: 70px; 
-    height: 70px; 
-    line-height: 70px; 
-    border-radius: 50%; 
-    margin: 0 auto 10px; 
-    border: 2px solid #58a6ff; 
-}
+/* DEPOSITO */
+.red-warning { background: rgba(248, 81, 73, 0.1); color: #f85149; padding: 12px; border-radius: 10px; font-size: 0.75em; border: 1px solid #f85149; margin-bottom: 15px; font-weight: bold; }
+.wallet-box { background: #0b0e14; border: 1px dashed #58a6ff; padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 15px; cursor: pointer; }
+.wallet-addr { font-size: 0.75em; color: #fff; margin: 5px 0; word-break: break-all; font-family: monospace; }
+input { width: 100%; padding: 15px; background: #161b22; border: 1px solid #30363d; color: white; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box; }
+.btn-main { background: #3fb950; color: white; width: 100%; border: none; padding: 15px; border-radius: 12px; font-weight: bold; font-size: 1em; }
 
-.status-badge { 
-    background: #238636; 
-    font-size: 0.7em; 
-    padding: 5px 12px; 
-    border-radius: 20px; 
-    font-weight: bold; 
-}
+/* NAV */
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #161b22; display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid #30363d; }
+.bottom-nav button { background: transparent; color: #8b949e; border: none; font-size: 0.75em; display: flex; flex-direction: column; align-items: center; }
 
-/* TARJETAS Y CUADRÍCULA DE MINERÍA */
-.main-cards { 
-    display: grid; 
-    grid-template-columns: 1fr 1fr; 
-    gap: 12px; 
-}
-
-.card { 
-    background: #161b22; 
-    padding: 15px; 
-    border-radius: 12px; 
-    border: 1px solid #30363d; 
-    text-align: center; 
-}
-
-.miner-grid { 
-    display: grid; 
-    grid-template-columns: 1fr 1fr; 
-    gap: 15px; 
-}
-
-.miner-card { 
-    background: #161b22; 
-    padding: 15px; 
-    border-radius: 18px; 
-    border: 1px solid #30363d; 
-    text-align: center; 
-    transition: transform 0.2s;
-}
-
-.miner-card:active {
-    transform: scale(0.98);
-}
-
-.plan-details-visual { 
-    margin: 10px 0; 
-    font-size: 0.75em; 
-    line-height: 1.5; 
-    color: #3fb950; 
-    text-align: left; 
-    background: #0b0e14; 
-    padding: 8px; 
-    border-radius: 8px; 
-}
-
-.price { 
-    font-size: 1.2em; 
-    font-weight: bold; 
-    color: #f7931a; 
-    margin: 2px 0; 
-}
-
-/* FORMULARIOS Y BOTONES */
-input { 
-    width: 100%; 
-    padding: 14px; 
-    margin: 10px 0; 
-    border-radius: 10px; 
-    border: 1px solid #30363d; 
-    background: #161b22; 
-    color: white; 
-    box-sizing: border-box; 
-}
-
-button { 
-    font-weight: bold; 
-    border-radius: 10px; 
-    border: none; 
-    cursor: pointer; 
-}
-
-.btn-activate { 
-    background: #f7931a; 
-    color: white; 
-    padding: 10px; 
-    width: 100%; 
-    margin-top: 5px; 
-}
-
-.btn-main { 
-    background: #3fb950; 
-    color: white; 
-    padding: 15px; 
-    width: 100%; 
-    margin-top: 10px; 
-}
-
-/* NAVEGACIÓN Y BILLETERA */
-.bottom-nav { 
-    position: fixed; 
-    bottom: 0; 
-    left: 0; 
-    right: 0; 
-    background: #161b22; 
-    display: flex; 
-    justify-content: space-around; 
-    padding: 12px; 
-    border-top: 1px solid #30363d; 
-    z-index: 1000; 
-}
-
-.bottom-nav button { 
-    background: transparent; 
-    color: #8b949e; 
-    width: auto; 
-    font-size: 0.75em; 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-}
-
-.wallet-display { 
-    background: #1c2128; 
-    padding: 12px; 
-    border-radius: 10px; 
-    border: 1px dashed #58a6ff; 
-    text-align: center; 
-    margin: 15px 0; 
-    font-size: 0.8em; 
-    word-break: break-all;
-}
-
-/* PANEL ADMIN E HISTORIAL */
-.admin-historial-item { 
-    font-size: 0.75em; 
-    background: #1c2128; 
-    padding: 10px; 
-    margin-bottom: 8px; 
-    border-radius: 8px; 
-    border: 1px solid #30363d; 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: center;
-}
-
-.red-warning { 
-    background: rgba(248, 81, 73, 0.1); 
-    color: #f85149; 
-    padding: 10px; 
-    border-radius: 8px; 
-    font-size: 0.75em; 
-    text-align: center; 
-    font-weight: bold; 
-    margin-bottom: 10px; 
-}
+/* ADMIN */
+.admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.admin-card-mini { background: #1c2128; padding: 8px; border-radius: 8px; font-size: 0.7em; border: 1px solid #30363d; margin-bottom: 8px; }
+.admin-card-mini button { background: #238636; color: white; border: none; padding: 5px; width: 100%; border-radius: 4px; margin-top: 5px; }
