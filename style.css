@@ -16,7 +16,7 @@ body { background: #0b0e14; color: white; font-family: sans-serif; margin: 0; pa
 .plan-icon { font-size: 2.5em; display: block; }
 .plan-stats { font-size: 0.75em; color: #3fb950; margin: 10px 0; }
 
-.status-item { background: #1c2128; padding: 10px; margin-bottom: 8px; border-radius: 8px; display: flex; justify-content: space-between; border: 1px solid #30363d; font-size: 0.85em; }
+.status-item { background: #1c2128; padding: 10px; margin-bottom: 8px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #30363d; font-size: 0.85em; }
 .border-bronce { border-left: 5px solid #cd7f32; }
 .border-plata { border-left: 5px solid #c0c0c0; }
 .border-oro { border-left: 5px solid #ffd700; }
@@ -33,5 +33,8 @@ body { background: #0b0e14; color: white; font-family: sans-serif; margin: 0; pa
 input { width: 100%; padding: 12px; margin: 5px 0 15px; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 8px; box-sizing: border-box; }
 .btn-activate { background: #f7931a; color: white; width: 100%; border: none; padding: 8px; border-radius: 8px; font-weight: bold; }
 .btn-main { background: #3fb950; color: white; width: 100%; border: none; padding: 15px; border-radius: 10px; font-weight: bold; }
+
+.title-center { text-align: center; margin-bottom: 20px; color: #f7931a; }
+
 .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #161b22; display: flex; justify-content: space-around; padding: 10px; border-top: 1px solid #30363d; }
-.bottom-nav button { background: transparent; color: #8b949e; border: none; font-size: 0.7em; }
+.bottom-nav button { background: transparent; color: #8b949e; border: none; font-size: 0.7em; flex: 1; padding: 5px; }
