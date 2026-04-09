@@ -4,14 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>InvestVIP - Plataforma de Inversión</title>
-
     <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval' blob:; connect-src * 'unsafe-inline'; img-src * data: blob: 'unsafe-inline'; frame-src *; style-src * 'unsafe-inline';">
-
     <link rel="stylesheet" href="style.css">
-
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.js" defer></script>
-    
     <script src="script.js" defer></script>
 </head>
 <body>
@@ -20,28 +16,28 @@
             <div class="profile-header">
                 <div class="avatar">👤</div>
                 <h2 id="username">Cargando...</h2>
-                <span class="badge">Verificado</span>
+                <span class="status-badge">Verificado</span>
             </div>
 
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <small>Saldo Depósito</small>
-                    <div class="value"><span id="home-saldo-deposito">0.00</span></div>
+            <div class="main-cards">
+                <div class="card">
+                    <small class="balance-label">Saldo Depósito</small>
+                    <div class="price">$<span id="home-saldo-deposito">0.00</span></div>
                 </div>
-                <div class="stat-card">
-                    <small>Saldo Retirable</small>
-                    <div class="value"><span id="home-saldo-retirable">0.00</span></div>
+                <div class="card">
+                    <small class="balance-label">Saldo Retirable</small>
+                    <div class="price">$<span id="home-saldo-retirable">0.00</span></div>
                 </div>
             </div>
 
-            <div class="main-card">
-                <small>ESTIMADO DIARIO (TOTAL)</small>
-                <div class="total-value" id="home-estimado-diario">$0.00</div>
+            <div class="card" style="margin-top:15px;">
+                <small class="balance-label">ESTIMADO DIARIO (TOTAL)</small>
+                <div class="balance-display" id="home-estimado-diario">$0.00</div>
             </div>
 
-            <div class="secondary-card">
-                <small>Total Retirado</small>
-                <div class="value" id="home-total-retirado">0.00</div>
+            <div class="card" style="margin-top:10px;">
+                <small class="balance-label">Total Retirado</small>
+                <div class="price" id="home-total-retirado">0.00</div>
             </div>
 
             <h4 style="margin-top:20px; font-size:0.8em; color:#8b949e;">MIS PLANES ACTIVOS</h4>
@@ -52,70 +48,60 @@
         </section>
 
         <section id="section-invest" style="display:none;">
-            <h3>Planes de Inversión</h3>
-            <div class="plan-card" onclick="invertir(11)">
-                <div class="plan-info">
-                    <strong>BRONCE</strong>
-                    <span>Inversión: $11</span>
+            <h3 style="text-align:center;">Minería de Activos</h3>
+            <div class="miner-grid">
+                <div class="miner-card" onclick="invertir(11)">
+                    <div class="balance-label">BRONCE</div>
+                    <div class="price">$11</div>
+                    <div class="plan-details-visual">• Retorno: $0.65/día<br>• Red: BEP20</div>
+                    <button class="btn-activate">ACTIVAR</button>
                 </div>
-                <div class="plan-gain">+$0.65/día</div>
-            </div>
-            <div class="plan-card" onclick="invertir(30)">
-                <div class="plan-info">
-                    <strong>PLATA</strong>
-                    <span>Inversión: $30</span>
+                <div class="miner-card" onclick="invertir(30)">
+                    <div class="balance-label">PLATA</div>
+                    <div class="price">$30</div>
+                    <div class="plan-details-visual">• Retorno: $1.66/día<br>• Red: BEP20</div>
+                    <button class="btn-activate">ACTIVAR</button>
                 </div>
-                <div class="plan-gain">+$1.66/día</div>
-            </div>
-            <div class="plan-card" onclick="invertir(60)">
-                <div class="plan-info">
-                    <strong>ORO</strong>
-                    <span>Inversión: $60</span>
+                <div class="miner-card" onclick="invertir(60)">
+                    <div class="balance-label">ORO</div>
+                    <div class="price">$60</div>
+                    <div class="plan-details-visual">• Retorno: $3.00/día<br>• Red: BEP20</div>
+                    <button class="btn-activate">ACTIVAR</button>
                 </div>
-                <div class="plan-gain">+$3.00/día</div>
-            </div>
-            <div class="plan-card vip" onclick="invertir(120)">
-                <div class="plan-info">
-                    <strong>VIP</strong>
-                    <span>Inversión: $120</span>
+                <div class="miner-card" onclick="invertir(120)">
+                    <div class="balance-label">VIP</div>
+                    <div class="price">$120</div>
+                    <div class="plan-details-visual">• Retorno: $6.30/día<br>• Red: BEP20</div>
+                    <button class="btn-activate">ACTIVAR</button>
                 </div>
-                <div class="plan-gain">+$6.30/día</div>
             </div>
         </section>
 
         <section id="section-deposit" style="display:none;">
             <h3>Recargar Saldo</h3>
-            <div class="deposit-box">
+            <div class="wallet-display">
                 <p>Envía USDT (BEP20) a:</p>
                 <code id="wallet-addr" onclick="copyWallet()">0xd6fe607116c1df2b4dae56e77ffdae50cde9d153</code>
-                <small>(Toca para copiar)</small>
+                <br><small>(Toca para copiar)</small>
             </div>
-            <div style="margin-top:20px;">
-                <label>Pega el Hash de la transacción:</label>
-                <input type="text" id="tx-hash" placeholder="0x...">
-                <button class="btn-main" onclick="verifyTx()">INFORMAR PAGO</button>
-            </div>
+            <input type="text" id="tx-hash" placeholder="Pega el Hash de transacción">
+            <button class="btn-main" onclick="verifyTx()">INFORMAR PAGO</button>
         </section>
 
         <section id="section-withdraw" style="display:none;">
             <h3>Retirar Ganancias</h3>
-            <div class="withdraw-card">
-                <span>Disponible para retiro:</span>
-                <strong id="withdraw-available">$0.00</strong>
+            <div class="card">
+                <span class="balance-label">Disponible:</span>
+                <div class="price" id="withdraw-available">$0.00</div>
             </div>
             <input type="number" id="withdraw-amount" placeholder="Monto (Min $5)">
-            <input type="text" id="withdraw-wallet" placeholder="Dirección USDT (RED BEP20)">
+            <input type="text" id="withdraw-wallet" placeholder="Dirección USDT (BEP20)">
             <button class="btn-main" onclick="procesarRetiro()" style="background:#f85149;">SOLICITAR RETIRO</button>
         </section>
 
         <section id="section-admin" style="display:none;">
             <h3>Panel Admin</h3>
             <div id="admin-solicitudes"></div>
-            <hr style="border: 0; border-top: 1px solid #30363d; margin: 20px 0;">
-            <h4 style="color:#58a6ff; font-size:0.8em;">HISTORIAL DE DEPÓSITOS</h4>
-            <div id="admin-historial-depositos"></div>
-            <h4 style="color:#f85149; font-size:0.8em; margin-top:20px;">HISTORIAL DE RETIROS</h4>
-            <div id="admin-historial-retiros"></div>
         </section>
 
         <nav class="bottom-nav">
