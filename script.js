@@ -25,20 +25,11 @@ async function cargarDatos() {
         document.getElementById('username').innerText = userName;
         document.getElementById('home-saldo-deposito').innerText = "$" + (u.saldo_deposito || 0).toFixed(2);
         document.getElementById('home-saldo-retirable').innerText = "$" + (u.saldo_retirable || 0).toFixed(2);
-        document.getElementById('home-total-retirado').innerText = "$" + (u.total_retirado || 0).toFixed(2);
         document.getElementById('withdraw-available').innerText = "$" + (u.saldo_retirable || 0).toFixed(2);
+        
         actualizarMisPlanes();
         actualizarHistorialHome();
     } catch (e) { console.error(e); }
-}
-
-function nav(id) {
-    document.querySelectorAll('section').forEach(s => s.style.display = 'none');
-    document.getElementById(id).style.display = 'block';
-    if (id === 'section-admin') cargarAdmin();
-    if (id === 'section-deposit') cargarStatusLocal('deposito', 'status-depositos');
-    if (id === 'section-withdraw') cargarStatusLocal('retiro', 'status-retiros');
-    cargarDatos();
 }
 
 async function invertir(costo, nombre, ganancia) {
@@ -49,28 +40,7 @@ async function invertir(costo, nombre, ganancia) {
             id_telegram: userId, nombre_plan: nombre, monto_invertido: costo, 
             ganancia_diaria: ganancia, activo: true, ultima_bonificacion: new Date().toISOString() 
         }]);
-        alert("🚀 ¡Plan " + nombre + " Activado!");
-        nav('section-home');
-    } else alert("❌ Saldo insuficiente.");
-}
-
-async function verifyTx() {
-    const hash = document.getElementById('tx-hash').value;
-    const montoDeclarado = parseFloat(document.getElementById('dep-amount').value);
-    if (hash.length < 5 || isNaN(montoDeclarado)) return alert("Ingresa monto y hash válido.");
-    await supabaseClient.from('solicitudes').insert([{ id_telegram: userId, tipo: 'deposito', detalles: hash, estado: 'pendiente', monto: montoDeclarado }]);
-    alert("⌛ Procesando Depósito...");
-    nav('section-home');
-}
-
-async function procesarRetiro() {
-    const monto = parseFloat(document.getElementById('withdraw-amount').value);
-    const wallet = document.getElementById('withdraw-wallet').value;
-    if (!wallet || monto < 5) return alert("Monto mínimo $5.");
-    let { data: u } = await supabaseClient.from('usuarios').select('saldo_retirable').eq('id_telegram', userId).single();
-    if (u?.saldo_retirable >= monto) {
-        await supabaseClient.from('solicitudes').insert([{ id_telegram: userId, tipo: 'retiro', monto: monto, detalles: wallet, estado: 'pendiente' }]);
-        alert("✅ Retiro enviado.");
+        alert(`Plan ${nombre} Activado, tu minería ha comenzado!`);
         nav('section-home');
     } else alert("Saldo insuficiente.");
 }
@@ -79,11 +49,13 @@ async function actualizarMisPlanes() {
     let { data: planes } = await supabaseClient.from('planes_activos').select('*').eq('id_telegram', userId).eq('activo', true);
     const div = document.getElementById('lista-planes');
     let total = 0; div.innerHTML = "";
-    planes?.forEach(p => {
-        total += p.ganancia_diaria;
-        let tag = p.nombre_plan.toLowerCase();
-        div.innerHTML += `<div class="status-item border-${tag}"><b>${p.nombre_plan.toUpperCase()}</b><div class="price-neon">+$${p.ganancia_diaria.toFixed(2)}/día</div></div>`;
-    });
+    if(planes) {
+        planes.forEach(p => {
+            total += p.ganancia_diaria;
+            let tag = p.nombre_plan.toLowerCase();
+            div.innerHTML += `<div class="status-item border-${tag}"><b>${p.nombre_plan.toUpperCase()}</b><div class="price-neon">+$${p.ganancia_diaria.toFixed(2)}/día</div></div>`;
+        });
+    }
     document.getElementById('home-estimado-diario').innerText = "$" + total.toFixed(2);
 }
 
@@ -96,6 +68,62 @@ async function actualizarHistorialHome() {
     });
 }
 
+async function cargarAdmin() {
+    const dList = document.getElementById('admin-dep-list');
+    const rList = document.getElementById('admin-ret-list');
+    const hDep = document.getElementById('admin-hist-dep');
+    const hRet = document.getElementById('admin-hist-ret');
+    dList.innerHTML = ""; rList.innerHTML = ""; hDep.innerHTML = ""; hRet.innerHTML = "";
+
+    let { data: sol } = await supabaseClient.from('solicitudes').select('*').order('fecha', {ascending: false});
+    sol?.forEach(s => {
+        const item = `<div class="admin-card-mini">
+            <small>ID: ${s.id_telegram}</small><br>
+            $${s.monto} <button onclick="gestionarAdmin('${s.id}','${s.id_telegram}','${s.tipo}',${s.monto})">OK</button>
+        </div>`;
+
+        const histItem = `<div class="admin-card-mini" style="opacity:0.7">
+            <small>${s.id_telegram}</small><br><b>$${s.monto}</b>
+        </div>`;
+
+        if(s.estado === 'pendiente') {
+            if(s.tipo === 'deposito') dList.innerHTML += item; else rList.innerHTML += item;
+        } else {
+            if(s.tipo === 'deposito') hDep.innerHTML += histItem; else hRet.innerHTML += histItem;
+        }
+    });
+}
+
+function nav(id) {
+    document.querySelectorAll('section').forEach(s => s.style.display = 'none');
+    document.getElementById(id).style.display = 'block';
+    if (id === 'section-admin') cargarAdmin();
+    if (id === 'section-deposit') cargarStatusLocal('deposito', 'status-depositos');
+    if (id === 'section-withdraw') cargarStatusLocal('retiro', 'status-retiros');
+    cargarDatos();
+}
+
+async function verifyTx() {
+    const hash = document.getElementById('tx-hash').value;
+    const monto = parseFloat(document.getElementById('dep-amount').value);
+    if (!hash || isNaN(monto)) return alert("Datos inválidos.");
+    await supabaseClient.from('solicitudes').insert([{ id_telegram: userId, tipo: 'deposito', detalles: hash, estado: 'pendiente', monto: monto }]);
+    alert("⌛ Recibido. Verificaremos tu depósito pronto.");
+    nav('section-home');
+}
+
+async function procesarRetiro() {
+    const monto = parseFloat(document.getElementById('withdraw-amount').value);
+    const wallet = document.getElementById('withdraw-wallet').value;
+    if (!wallet || monto < 5) return alert("Monto mínimo $5.");
+    let { data: u } = await supabaseClient.from('usuarios').select('saldo_retirable').eq('id_telegram', userId).single();
+    if (u?.saldo_retirable >= monto) {
+        await supabaseClient.from('solicitudes').insert([{ id_telegram: userId, tipo: 'retiro', monto: monto, detalles: wallet, estado: 'pendiente' }]);
+        alert("✅ Solicitud enviada.");
+        nav('section-home');
+    } else alert("Saldo insuficiente.");
+}
+
 async function cargarStatusLocal(tipo, divId) {
     let { data: items } = await supabaseClient.from('solicitudes').select('*').eq('id_telegram', userId).eq('tipo', tipo).order('fecha', {ascending: false});
     const div = document.getElementById(divId); div.innerHTML = "";
@@ -105,44 +133,21 @@ async function cargarStatusLocal(tipo, divId) {
     });
 }
 
-async function cargarAdmin() {
-    const dList = document.getElementById('admin-dep-list');
-    const rList = document.getElementById('admin-ret-list');
-    const gList = document.getElementById('admin-global-log');
-    dList.innerHTML = ""; rList.innerHTML = ""; gList.innerHTML = "";
-
-    let { data: pend } = await supabaseClient.from('solicitudes').select('*').eq('estado', 'pendiente');
-    pend?.forEach(s => {
-        const item = `<div class="admin-card-mini">
-            <small>ID: ${s.id_telegram}</small><br>
-            <b onclick="copyText('${s.detalles}')" style="color:#58a6ff; cursor:pointer">📋 COPIAR DATOS</b><br>
-            ${s.tipo==='retiro'?'RET: $'+s.monto:'DEP: $'+s.monto}<br>
-            <button onclick="gestionarAdmin('${s.id}','${s.id_telegram}','${s.tipo}',${s.monto})">PROCESAR</button>
-        </div>`;
-        if(s.tipo === 'deposito') dList.innerHTML += item; else rList.innerHTML += item;
-    });
-
-    let { data: log } = await supabaseClient.from('solicitudes').select('*').neq('estado', 'pendiente').order('fecha', {ascending: false}).limit(10);
-    log?.forEach(l => {
-        gList.innerHTML += `<div class="status-item"><small>${l.id_telegram}</small><strong>$${l.monto} (${l.tipo})</strong><small style="color:#3fb950">APROBADO</small></div>`;
-    });
-}
-
 async function gestionarAdmin(id, userT, tipo, montoOri) {
     if (tipo === 'deposito') {
-        let real = parseFloat(prompt("Validar monto REAL a acreditar (Usuario dijo: $" + montoOri + "):", montoOri));
-        if (isNaN(real) || real <= 0) return;
+        let real = parseFloat(prompt("Confirmar monto real:", montoOri));
+        if (isNaN(real)) return;
         let { data: u } = await supabaseClient.from('usuarios').select('saldo_deposito').eq('id_telegram', userT).single();
         await supabaseClient.from('usuarios').update({ saldo_deposito: (u.saldo_deposito || 0) + real }).eq('id_telegram', userT);
         await supabaseClient.from('solicitudes').update({ monto: real, estado: 'completado', fecha: new Date().toISOString() }).eq('id', id);
     } else {
-        let hash = prompt("Ingresa el HASH de pago realizado:");
+        let hash = prompt("Hash de pago:");
         if (!hash) return;
         let { data: u } = await supabaseClient.from('usuarios').select('*').eq('id_telegram', userT).single();
         await supabaseClient.from('usuarios').update({ saldo_retirable: u.saldo_retirable - montoOri, total_retirado: (u.total_retirado || 0) + montoOri }).eq('id_telegram', userT);
         await supabaseClient.from('solicitudes').update({ detalles: hash, estado: 'completado', fecha: new Date().toISOString() }).eq('id', id);
     }
-    alert("Éxito."); cargarAdmin();
+    cargarAdmin();
 }
 
 async function procesarPagosDiarios() {
@@ -158,5 +163,5 @@ async function procesarPagosDiarios() {
     }
 }
 
-function copyText(txt) { navigator.clipboard.writeText(txt); alert("✅ Copiado"); }
+function copyText(txt) { navigator.clipboard.writeText(txt); alert("✅ Copiado al portapapeles"); }
 document.addEventListener('DOMContentLoaded', iniciarApp);
