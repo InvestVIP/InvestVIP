@@ -1,48 +1,48 @@
 body { background: #0b0e14; color: white; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 15px; padding-bottom: 100px; }
 #app { max-width: 450px; margin: auto; }
+
+/* PERFIL */
 .profile-header { text-align: center; margin-bottom: 25px; }
 .avatar { font-size: 40px; background: #1c2128; width: 70px; height: 70px; line-height: 70px; border-radius: 50%; margin: 0 auto 10px; border: 2px solid #58a6ff; }
 .status-badge { background: #238636; font-size: 0.7em; padding: 5px 12px; border-radius: 20px; font-weight: bold; }
 
-/* DASHBOARD CARDS */
 .main-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.card, .card-special, .card-estimate { background: #161b22; padding: 15px; border-radius: 12px; border: 1px solid #30363d; text-align: center; }
-.card-special { border-color: #3fb950; margin-top: 12px; }
-.card-estimate { border-color: #f7931a; margin-top: 10px; }
-.price { font-size: 1.3em; font-weight: bold; color: #f7931a; }
-.price-green { font-size: 1.5em; font-weight: bold; color: #3fb950; }
-.price-neon { color: #00ffcc; font-weight: bold; font-size: 0.9em; }
+.card, .card-estimate, .card-total-retirado { background: #161b22; padding: 15px; border-radius: 12px; border: 1px solid #30363d; text-align: center; margin-bottom: 10px; }
+.card-estimate { border-color: #00ffcc; box-shadow: 0 0 10px rgba(0,255,204,0.1); margin-top: 10px; }
+.price-neon { font-size: 2.2em; font-weight: 800; color: #00ffcc; text-shadow: 0 0 10px rgba(0,255,204,0.3); }
+.price { font-size: 1.2em; font-weight: bold; color: #f7931a; }
 .balance-label { font-size: 0.7em; color: #8b949e; text-transform: uppercase; letter-spacing: 1px; }
 
-/* SECCIONES Y LISTAS */
-.section-title { font-size: 0.75em; color: #8b949e; margin: 25px 0 10px; font-weight: bold; }
-.status-item { background: #1c2128; padding: 12px; margin-bottom: 8px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #30363d; font-size: 0.85em; }
+/* INVERTIR */
+.miner-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.miner-card { background: #161b22; padding: 20px 10px; border-radius: 18px; border: 1px solid #30363d; text-align: center; }
+.plan-icon { font-size: 2.5em; margin-bottom: 5px; }
+.plan-stats { font-size: 0.75em; color: #3fb950; margin: 10px 0; background: #0b0e14; padding: 8px; border-radius: 8px; }
 
-/* VIÑETAS POR COLOR */
+/* COLORES PLANES */
 .border-bronce { border-left: 5px solid #cd7f32; }
 .border-plata { border-left: 5px solid #c0c0c0; }
 .border-oro { border-left: 5px solid #ffd700; }
 .border-vip { border-left: 5px solid #00ffcc; }
 
-/* INVERTIR GRID */
-.miner-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.miner-card { background: #161b22; padding: 15px; border-radius: 18px; border: 1px solid #30363d; text-align: center; }
-.plan-icon { font-size: 3.5em; margin-bottom: 5px; }
-.plan-stats { font-size: 0.7em; color: #3fb950; margin: 8px 0; line-height: 1.4; }
-.btn-activate { background: #f7931a; color: white; width: 100%; border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+/* UI ELEMENTS */
+.section-title { font-size: 0.75em; color: #8b949e; margin: 20px 0 10px; }
+.status-item { background: #1c2128; padding: 12px; margin-bottom: 8px; border-radius: 10px; border: 1px solid #30363d; display: flex; justify-content: space-between; align-items: center; }
+.alert-box { padding: 10px; border-radius: 8px; font-size: 0.75em; text-align: center; margin-bottom: 15px; }
+.alert-box.info { background: rgba(88, 166, 255, 0.1); color: #58a6ff; border: 1px solid #58a6ff; }
+.copy-container { background: #1c2128; border: 2px dashed #58a6ff; padding: 15px; border-radius: 12px; text-align: center; cursor: pointer; margin-bottom: 15px; }
+.copy-label { font-size: 0.6em; color: #8b949e; }
+.copy-btn { color: #58a6ff; font-size: 0.7em; font-weight: bold; margin-top: 5px; }
 
-/* DEPÓSITO UI */
-.red-warning { background: rgba(248, 81, 73, 0.1); color: #f85149; padding: 12px; border-radius: 10px; font-size: 0.75em; border: 1px solid #f85149; margin-bottom: 15px; font-weight: bold; }
-.wallet-box { background: #0b0e14; border: 1px dashed #58a6ff; padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 15px; cursor: pointer; }
-.wallet-addr { font-size: 0.7em; color: #fff; margin: 5px 0; word-break: break-all; font-family: monospace; }
-input { width: 100%; padding: 15px; background: #161b22; border: 1px solid #30363d; color: white; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box; }
-.btn-main { background: #3fb950; color: white; width: 100%; border: none; padding: 15px; border-radius: 12px; font-weight: bold; }
+/* ADMIN COLUMNAS */
+.admin-grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.admin-header { font-size: 0.7em; text-align: center; color: #58a6ff; border-bottom: 1px solid #30363d; padding-bottom: 5px; }
+.admin-card-mini { background: #1c2128; padding: 8px; border-radius: 8px; border: 1px solid #30363d; font-size: 0.7em; margin-bottom: 8px; }
+.admin-card-mini button { background: #3fb950; color: white; border: none; padding: 4px; width: 100%; border-radius: 4px; margin-top: 5px; }
 
-/* NAV BAR */
+/* NAV & BUTTONS */
+input { width: 100%; padding: 14px; margin: 10px 0; border-radius: 10px; border: 1px solid #30363d; background: #161b22; color: white; box-sizing: border-box; }
+.btn-activate { background: #f7931a; color: white; padding: 10px; width: 100%; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
+.btn-main { background: #3fb950; color: white; padding: 15px; width: 100%; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; }
 .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #161b22; display: flex; justify-content: space-around; padding: 12px; border-top: 1px solid #30363d; }
 .bottom-nav button { background: transparent; color: #8b949e; border: none; font-size: 0.75em; display: flex; flex-direction: column; align-items: center; }
-
-/* ADMIN UI MAESTRO */
-.admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.admin-card-mini { background: #1c2128; padding: 8px; border-radius: 8px; font-size: 0.72em; border: 1px solid #30363d; margin-bottom: 8px; }
-.admin-card-mini button { background: #f7931a; color: white; border: none; padding: 6px; width: 100%; border-radius: 4px; margin-top: 5px; font-weight: bold; cursor: pointer; }
