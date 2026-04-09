@@ -105,13 +105,12 @@ async function procesarRetiro() {
     } else alert("Saldo insuficiente.");
 }
 
-// ADMIN ACTUALIZADO PARA LAS DOS SUB-COLUMNAS
+// CARGAR ADMIN CON INPUTS DE SEGURIDAD
 async function cargarAdmin() {
     const depDiv = document.getElementById('admin-dep-list');
     const retDiv = document.getElementById('admin-ret-list');
     const procDiv = document.getElementById('admin-historial-procesados');
     
-    // Reiniciar contenedores manteniendo el label de cabecera
     depDiv.innerHTML = '<small style="color: #3fb950; display: block; text-align: center; margin-bottom: 5px; font-weight: bold;">DEPÓSITOS</small>'; 
     retDiv.innerHTML = '<small style="color: #f85149; display: block; text-align: center; margin-bottom: 5px; font-weight: bold;">RETIROS</small>'; 
     procDiv.innerHTML = "";
@@ -122,15 +121,25 @@ async function cargarAdmin() {
         const esDep = s.tipo === 'deposito';
         const color = esDep ? '#3fb950' : '#f85149';
         const item = `
-            <div class="admin-card-mini" style="border-left: 4px solid ${color}; background: #161b22; padding: 10px; margin-bottom: 8px; border-radius: 4px;">
-                <div style="display:flex; justify-content:space-between; font-size:0.75em; color:#8b949e; margin-bottom:5px;">
-                    <span>ID: ${s.id_telegram.slice(-5)}</span>
-                    <span style="color:${color}">${s.tipo.toUpperCase()}</span>
+            <div class="admin-card-mini" style="border-left: 4px solid ${color}; background: #161b22; padding: 10px; margin-bottom: 12px; border-radius: 4px;">
+                <div style="font-size:0.75em; color:#8b949e; margin-bottom:5px;">
+                    <strong>USER:</strong> ${s.id_telegram}<br>
+                    <strong>DATO USUARIO:</strong> <span style="color:#e6edf3; word-break: break-all;">${s.detalles}</span>
                 </div>
-                <strong style="font-size:1.1em; color:#e6edf3;">$${s.monto.toFixed(2)}</strong>
-                <button style="background:${color}; width:100%; border:none; color:white; padding:6px; margin-top:8px; border-radius:4px; font-weight:bold; cursor:pointer;" 
-                        onclick="gestionarSolicitud('${s.id}','${s.tipo}',${s.monto},'${s.id_telegram}')">
-                    APROBAR
+                
+                ${esDep ? `
+                    <label style="font-size:0.7em; color:#8b949e;">Monto Real Recibido ($):</label>
+                    <input type="number" id="input-monto-${s.id}" value="${s.monto}" 
+                           style="width:94%; background:#0d1117; color:white; border:1px solid #30363d; padding:5px; margin-bottom:8px; border-radius:4px;">
+                ` : `
+                    <label style="font-size:0.7em; color:#8b949e;">Hash de Pago Enviado (Admin):</label>
+                    <input type="text" id="input-hash-${s.id}" placeholder="Pega el hash de la TX" 
+                           style="width:94%; background:#0d1117; color:white; border:1px solid #30363d; padding:5px; margin-bottom:8px; border-radius:4px;">
+                `}
+                
+                <button style="background:${color}; width:100%; border:none; color:white; padding:8px; border-radius:4px; font-weight:bold; cursor:pointer;" 
+                        onclick="gestionarSolicitud('${s.id}','${s.tipo}','${s.id_telegram}')">
+                    APROBAR ${s.tipo.toUpperCase()}
                 </button>
             </div>`;
         
@@ -150,19 +159,42 @@ async function cargarAdmin() {
     });
 }
 
-async function gestionarSolicitud(id, tipo, monto, targetUid) {
-    if (!confirm(`¿Confirmar aprobación de ${tipo} por $${monto}?`)) return;
+// GESTIONAR SOLICITUD CON BLINDAJE
+async function gestionarSolicitud(id, tipo, targetUid) {
     try {
+        let updateData = { estado: 'completado' };
         let { data: user } = await supabaseClient.from('usuarios').select('*').eq('id_telegram', targetUid).single();
+
         if (tipo === 'deposito') {
-            await supabaseClient.from('usuarios').update({ saldo_deposito: (user.saldo_deposito || 0) + monto }).eq('id_telegram', targetUid);
+            const montoConfirmado = parseFloat(document.getElementById(`input-monto-${id}`).value);
+            if (isNaN(montoConfirmado) || montoConfirmado <= 0) return alert("Monto inválido.");
+            
+            if (!confirm(`¿Confirmar depósito de $${montoConfirmado.toFixed(2)}?`)) return;
+            
+            await supabaseClient.from('usuarios').update({ 
+                saldo_deposito: (user.saldo_deposito || 0) + montoConfirmado 
+            }).eq('id_telegram', targetUid);
+            
+            updateData.monto = montoConfirmado; 
         } else {
-            await supabaseClient.from('usuarios').update({ saldo_retirable: (user.saldo_retirable || 0) - monto }).eq('id_telegram', targetUid);
+            const hashAdmin = document.getElementById(`input-hash-${id}`).value;
+            if (hashAdmin.length < 10) return alert("Debes ingresar el Hash de la transferencia realizada.");
+            
+            if (!confirm("¿Ya enviaste el dinero? Esta acción registrará el hash y cerrará la solicitud.")) return;
+            
+            // Registramos el hash del admin en los detalles finales
+            updateData.detalles = "HASH PAGO: " + hashAdmin; 
         }
-        await supabaseClient.from('solicitudes').update({ estado: 'completado' }).eq('id', id);
-        alert("Transacción procesada correctamente."); 
+
+        const { error } = await supabaseClient.from('solicitudes').update(updateData).eq('id', id);
+        if (error) throw error;
+
+        alert("¡Transacción verificada y completada!");
         cargarAdmin();
-    } catch (e) { alert("Error al actualizar saldos."); }
+    } catch (e) { 
+        console.error(e);
+        alert("Error al procesar: " + e.message); 
+    }
 }
 
 async function verifyTx() {
