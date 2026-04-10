@@ -9,6 +9,8 @@ function iniciarApp() {
     supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } });
     if (tg) { tg.ready(); tg.expand(); }
     cargarDatos();
+    // SE AÑADE LA LLAMADA AL RELOJ AQUÍ
+    iniciarRelojPagos();
 }
 
 const userId = tg.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : '8754466303';
@@ -20,6 +22,32 @@ function nav(id) {
     if (id === 'section-admin') cargarAdmin();
     else if (id === 'section-history') cargarHistorialUnificado();
     else cargarDatos();
+}
+
+// NUEVA FUNCIÓN: LÓGICA DEL RELOJ (SIN TOCAR BASE DE DATOS)
+function iniciarRelojPagos() {
+    const timerElement = document.getElementById('payout-timer');
+    if (!timerElement) return;
+
+    setInterval(() => {
+        const ahora = new Date();
+        const proximoPago = new Date();
+        proximoPago.setUTCHours(24, 0, 0, 0); 
+
+        const diferencia = proximoPago - ahora;
+
+        if (diferencia <= 0) {
+            timerElement.innerText = "PROCESANDO...";
+            return;
+        }
+
+        const horas = Math.floor((diferencia / (1000 * 60 * 60)) % 24);
+        const minutos = Math.floor((diferencia / 1000 / 60) % 60);
+        const segundos = Math.floor((diferencia / 1000) % 60);
+
+        timerElement.innerText = 
+            `${horas.toString().padStart(2, '0')}:${minutos.toString().padStart(2, '0')}:${segundos.toString().padStart(2, '0')}`;
+    }, 1000);
 }
 
 async function cargarDatos() {
@@ -105,7 +133,6 @@ async function procesarRetiro() {
     } else alert("Saldo insuficiente.");
 }
 
-// ADMIN ACTUALIZADO
 async function cargarAdmin() {
     const depDiv = document.getElementById('admin-dep-list');
     const retDiv = document.getElementById('admin-ret-list');
@@ -121,7 +148,6 @@ async function cargarAdmin() {
         const esDep = s.tipo === 'deposito';
         const color = esDep ? '#3fb950' : '#f85149';
         
-        // Helper para copiar texto
         const btnCopiar = (txt) => `<button onclick="navigator.clipboard.writeText('${txt}'); alert('Copiado');" style="background:#30363d; border:none; color:#c9d1d9; font-size:0.7em; padding:2px 5px; border-radius:3px; cursor:pointer; margin-left:5px;">Copiar</button>`;
 
         const item = `
