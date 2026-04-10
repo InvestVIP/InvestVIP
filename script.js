@@ -49,7 +49,7 @@ function iniciarRelojPagos() {
 }
 
 // ==========================================
-// PASO 2: CARGAR DATOS CON REGISTRO DE REFERIDO
+// CARGAR DATOS (CON CAPTURA DE REFERIDO)
 // ==========================================
 async function cargarDatos() {
     try {
@@ -120,7 +120,8 @@ async function cargarHistorialUnificado() {
                 colorClass: s.tipo === 'retiro' ? 'amount-negative' : 'amount-positive'
             };
 
-            if (s.tipo === 'deposito') {
+            // Incluimos las ganancias por referido en la sección de depósitos/ingresos
+            if (s.tipo === 'deposito' || s.tipo === 'referido') {
                 grupos.depositos.items.push(item);
                 if (s.estado === 'completado') grupos.depositos.total += s.monto;
             } else if (s.tipo === 'retiro') {
@@ -197,13 +198,53 @@ async function cargarHistorialUnificado() {
     }
 }
 
+// ==========================================
+// INVERTIR CON LÓGICA DE REFERIDOS (2%)
+// ==========================================
 async function invertir(costo) {
-    let { data: u } = await supabaseClient.from('usuarios').select('saldo_deposito').eq('id_telegram', userId).single();
+    let { data: u } = await supabaseClient.from('usuarios').select('*').eq('id_telegram', userId).single();
     if (u?.saldo_deposito >= costo) {
         let n = costo===11?"Bronce":costo===30?"Plata":costo===60?"Oro":"VIP";
         let g = costo===11?0.65:costo===30?1.66:costo===60?3.00:6.30;
-        await supabaseClient.from('usuarios').update({ saldo_deposito: u.saldo_deposito - costo }).eq('id_telegram', userId);
-        await supabaseClient.from('planes_activos').insert([{ id_telegram: userId, nombre_plan: n, monto_invertido: costo, ganancia_diaria: g, activo: true, fecha_inicio: new Date().toISOString() }]);
+        
+        // 1. Descontar saldo y activar estado de inversionista
+        await supabaseClient.from('usuarios').update({ 
+            saldo_deposito: u.saldo_deposito - costo,
+            es_inversionista: true 
+        }).eq('id_telegram', userId);
+
+        // 2. Insertar el plan activo
+        await supabaseClient.from('planes_activos').insert([{ 
+            id_telegram: userId, 
+            nombre_plan: n, 
+            monto_invertido: costo, 
+            ganancia_diaria: g, 
+            activo: true, 
+            fecha_inicio: new Date().toISOString() 
+        }]);
+
+        // 3. PAGO AL REFERIDOR (2%)
+        if (u.referido_por) {
+            let { data: invitador } = await supabaseClient.from('usuarios').select('*').eq('id_telegram', u.referido_por).single();
+            
+            // Regla: Paga si el invitador es inversionista activo
+            if (invitador && invitador.es_inversionista) {
+                const comision = costo * 0.02;
+                
+                await supabaseClient.from('usuarios').update({ 
+                    saldo_retirable: (invitador.saldo_retirable || 0) + comision 
+                }).eq('id_telegram', u.referido_por);
+
+                await supabaseClient.from('solicitudes').insert([{ 
+                    id_telegram: u.referido_por, 
+                    tipo: 'referido', 
+                    monto: comision, 
+                    detalles: `Comisión 2% por invitado ${userId}`, 
+                    estado: 'completado' 
+                }]);
+            }
+        }
+
         alert("¡Plan Activado!"); cargarDatos(); nav('section-home');
     } else alert("Saldo insuficiente.");
 }
