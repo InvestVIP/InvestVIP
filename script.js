@@ -48,20 +48,38 @@ function iniciarRelojPagos() {
     }, 1000);
 }
 
+// ==========================================
+// PASO 2: CARGAR DATOS CON REGISTRO DE REFERIDO
+// ==========================================
 async function cargarDatos() {
     try {
         if (userId === "8754466303") document.getElementById('btn-admin-tab').style.display = 'flex';
+        
         let { data: u } = await supabaseClient.from('usuarios').select('*').eq('id_telegram', userId).maybeSingle();
+        
         if (!u) {
-            const { data: n } = await supabaseClient.from('usuarios').insert([{ id_telegram: userId, saldo_deposito: 0, saldo_retirable: 0 }]).select().single();
+            // Capturamos el parámetro 'start' de Telegram para el sistema de referidos
+            const urlParams = new URLSearchParams(window.location.search);
+            const invitadorId = urlParams.get('tgWebAppStartParam'); 
+
+            const { data: n, error } = await supabaseClient.from('usuarios').insert([{ 
+                id_telegram: userId, 
+                saldo_deposito: 0, 
+                saldo_retirable: 0,
+                referido_por: invitadorId, // Vinculamos al invitador
+                es_inversionista: false    // Estado inicial
+            }]).select().single();
+            
+            if (error) throw error;
             u = n;
         }
+
         document.getElementById('username').innerText = userName;
         document.getElementById('home-saldo-deposito').innerText = (u.saldo_deposito || 0).toFixed(2);
         document.getElementById('home-saldo-retirable').innerText = (u.saldo_retirable || 0).toFixed(2);
         document.getElementById('withdraw-available').innerText = "$" + (u.saldo_retirable || 0).toFixed(2);
         actualizarMisPlanes();
-    } catch (e) { console.error(e); }
+    } catch (e) { console.error("Error en cargarDatos:", e); }
 }
 
 async function actualizarMisPlanes() {
@@ -77,9 +95,6 @@ async function actualizarMisPlanes() {
     document.getElementById('home-estimado-diario').innerText = "$" + total.toFixed(2);
 }
 
-// ==========================================
-// FUNCIÓN DE HISTORIAL CON ABONOS DIARIOS
-// ==========================================
 async function cargarHistorialUnificado() {
     const container = document.getElementById('historial-container');
     container.innerHTML = "<p style='text-align:center; color:white;'>Cargando historial...</p>";
@@ -97,7 +112,6 @@ async function cargarHistorialUnificado() {
             activaciones: { titulo: 'Activaciones de Planes', icono: '💎', items: [], total: 0 }
         };
 
-        // Procesar Depósitos y Retiros
         solRes.data?.forEach(s => {
             const item = {
                 monto: s.monto,
@@ -115,10 +129,8 @@ async function cargarHistorialUnificado() {
             }
         });
 
-        // Procesar Activaciones y Calcular Pagos Diarios Retroactivos
         const hoy = new Date();
         planRes.data?.forEach(p => {
-            // Item de la compra del plan
             grupos.activaciones.items.push({
                 monto: p.monto_invertido,
                 fecha: new Date(p.fecha_inicio || Date.now()).toISOString().split('T')[0],
@@ -127,7 +139,6 @@ async function cargarHistorialUnificado() {
             });
             grupos.activaciones.total += p.monto_invertido;
 
-            // Generar abonos diarios automáticos
             const fechaInicio = new Date(p.fecha_inicio);
             const diasPasados = Math.floor((hoy - fechaInicio) / (1000 * 60 * 60 * 24));
 
@@ -173,7 +184,6 @@ async function cargarHistorialUnificado() {
                 </div>`;
         };
 
-        // Renderizamos las ganancias primero
         container.innerHTML += renderizarTarjeta(grupos.ganancias);
         container.innerHTML += renderizarTarjeta(grupos.depositos);
         container.innerHTML += renderizarTarjeta(grupos.retiros);
