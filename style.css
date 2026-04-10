@@ -94,3 +94,84 @@ span[style*="word-break: break-all"] {
     50% { opacity: 0.8; text-shadow: 0 0 20px rgba(0, 255, 204, 0.6); }
     100% { opacity: 1; text-shadow: 0 0 10px rgba(0, 255, 204, 0.4); }
 }
+
+/* ========================================== */
+/* NUEVOS ESTILOS PARA EL HISTORIAL UNIFICADO */
+/* ========================================== */
+
+.history-main-container {
+    padding: 10px 5px;
+}
+
+.history-group-card {
+    background: #ffffff;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    padding: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.history-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eeeeee;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+.history-card-title {
+    color: #1c2128;
+    font-weight: bold;
+    font-size: 0.9em;
+}
+
+.history-card-total {
+    color: #444444;
+    font-size: 0.85em;
+}
+
+.history-card-total strong {
+    color: #238636;
+}
+
+.history-item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #f9f9f9;
+}
+
+.history-item-row:last-child {
+    border-bottom: none;
+}
+
+.history-amount {
+    font-weight: bold;
+    font-size: 0.95em;
+    width: 30%;
+}
+
+.amount-positive { color: #238636; }
+.amount-negative { color: #d73a49; }
+
+.history-date {
+    color: #8b949e;
+    font-size: 0.75em;
+    width: 35%;
+    text-align: center;
+}
+
+.history-status {
+    font-size: 0.7em;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    width: 35%;
+    text-align: right;
+}
+
+.status-completed { color: #238636; }
+.status-pending { color: #f7931a; }
