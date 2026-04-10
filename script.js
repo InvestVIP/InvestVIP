@@ -78,7 +78,7 @@ async function actualizarMisPlanes() {
 }
 
 // ==========================================
-// FUNCIÓN DE HISTORIAL ACTUALIZADA (ESTILO TARJETAS)
+// FUNCIÓN DE HISTORIAL CON ABONOS DIARIOS
 // ==========================================
 async function cargarHistorialUnificado() {
     const container = document.getElementById('historial-container');
@@ -91,11 +91,13 @@ async function cargarHistorialUnificado() {
         ]);
 
         const grupos = {
+            ganancias: { titulo: 'Ganancias por Minería', icono: '⚡', items: [], total: 0 },
             depositos: { titulo: 'Mis depósitos', icono: '📥', items: [], total: 0 },
             retiros: { titulo: 'Mis retiros', icono: '📤', items: [], total: 0 },
             activaciones: { titulo: 'Activaciones de Planes', icono: '💎', items: [], total: 0 }
         };
 
+        // Procesar Depósitos y Retiros
         solRes.data?.forEach(s => {
             const item = {
                 monto: s.monto,
@@ -113,7 +115,10 @@ async function cargarHistorialUnificado() {
             }
         });
 
+        // Procesar Activaciones y Calcular Pagos Diarios Retroactivos
+        const hoy = new Date();
         planRes.data?.forEach(p => {
+            // Item de la compra del plan
             grupos.activaciones.items.push({
                 monto: p.monto_invertido,
                 fecha: new Date(p.fecha_inicio || Date.now()).toISOString().split('T')[0],
@@ -121,6 +126,23 @@ async function cargarHistorialUnificado() {
                 colorClass: 'amount-negative'
             });
             grupos.activaciones.total += p.monto_invertido;
+
+            // Generar abonos diarios automáticos
+            const fechaInicio = new Date(p.fecha_inicio);
+            const diasPasados = Math.floor((hoy - fechaInicio) / (1000 * 60 * 60 * 24));
+
+            for (let i = 1; i <= diasPasados; i++) {
+                const fechaPago = new Date(fechaInicio);
+                fechaPago.setDate(fechaInicio.getDate() + i);
+                
+                grupos.ganancias.items.push({
+                    monto: p.ganancia_diaria,
+                    fecha: fechaPago.toISOString().split('T')[0],
+                    estado: 'completado',
+                    colorClass: 'amount-positive'
+                });
+                grupos.ganancias.total += p.ganancia_diaria;
+            }
         });
 
         container.innerHTML = "";
@@ -151,6 +173,8 @@ async function cargarHistorialUnificado() {
                 </div>`;
         };
 
+        // Renderizamos las ganancias primero
+        container.innerHTML += renderizarTarjeta(grupos.ganancias);
         container.innerHTML += renderizarTarjeta(grupos.depositos);
         container.innerHTML += renderizarTarjeta(grupos.retiros);
         container.innerHTML += renderizarTarjeta(grupos.activaciones);
@@ -158,6 +182,7 @@ async function cargarHistorialUnificado() {
         if (container.innerHTML === "") container.innerHTML = "<p style='text-align:center; color:white;'>Sin movimientos.</p>";
 
     } catch (e) {
+        console.error(e);
         container.innerHTML = "<p style='text-align:center; color:#f85149;'>Error al cargar.</p>";
     }
 }
