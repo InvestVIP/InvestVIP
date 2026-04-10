@@ -9,7 +9,6 @@ function iniciarApp() {
     supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } });
     if (tg) { tg.ready(); tg.expand(); }
     cargarDatos();
-    // SE AÑADE LA LLAMADA AL RELOJ AQUÍ
     iniciarRelojPagos();
 }
 
@@ -24,7 +23,6 @@ function nav(id) {
     else cargarDatos();
 }
 
-// NUEVA FUNCIÓN: LÓGICA DEL RELOJ (SIN TOCAR BASE DE DATOS)
 function iniciarRelojPagos() {
     const timerElement = document.getElementById('payout-timer');
     if (!timerElement) return;
@@ -79,26 +77,89 @@ async function actualizarMisPlanes() {
     document.getElementById('home-estimado-diario').innerText = "$" + total.toFixed(2);
 }
 
+// ==========================================
+// FUNCIÓN DE HISTORIAL ACTUALIZADA (ESTILO TARJETAS)
+// ==========================================
 async function cargarHistorialUnificado() {
-    const hDiv = document.getElementById('lista-historial-completo');
-    hDiv.innerHTML = "<p style='text-align:center;'>Cargando...</p>";
-    const [solRes, planRes] = await Promise.all([
-        supabaseClient.from('solicitudes').select('*').eq('id_telegram', userId),
-        supabaseClient.from('planes_activos').select('*').eq('id_telegram', userId)
-    ]);
-    let rawData = [];
-    solRes.data?.forEach(s => {
-        let esGasto = s.tipo === 'retiro';
-        rawData.push({ desc: s.tipo.toUpperCase(), monto: s.monto, estado: s.estado, color: esGasto ? '#f85149' : '#3fb950', signo: esGasto ? '-' : '+', fecha: new Date(s.fecha || Date.now()) });
-    });
-    planRes.data?.forEach(p => {
-        rawData.push({ desc: `ACTIVACIÓN PLAN ${p.nombre_plan.toUpperCase()}`, monto: p.monto_invertido, estado: 'completado', color: '#f85149', signo: '-', fecha: new Date(p.fecha_inicio || Date.now()) });
-    });
-    rawData.sort((a, b) => b.fecha - a.fecha);
-    hDiv.innerHTML = rawData.length === 0 ? "<p style='text-align:center;'>Sin movimientos.</p>" : "";
-    rawData.forEach(item => {
-        hDiv.innerHTML += `<div class="status-item"><div style="display:flex; flex-direction:column;"><span>${item.desc}</span><small style="font-size:0.7em; color:#8b949e;">${item.estado.toUpperCase()}</small></div><strong style="color:${item.color}">${item.signo}$${item.monto.toFixed(2)}</strong></div>`;
-    });
+    const container = document.getElementById('historial-container');
+    container.innerHTML = "<p style='text-align:center; color:white;'>Cargando historial...</p>";
+
+    try {
+        const [solRes, planRes] = await Promise.all([
+            supabaseClient.from('solicitudes').select('*').eq('id_telegram', userId),
+            supabaseClient.from('planes_activos').select('*').eq('id_telegram', userId)
+        ]);
+
+        const grupos = {
+            depositos: { titulo: 'Mis depósitos', icono: '📥', items: [], total: 0 },
+            retiros: { titulo: 'Mis retiros', icono: '📤', items: [], total: 0 },
+            activaciones: { titulo: 'Activaciones de Planes', icono: '💎', items: [], total: 0 }
+        };
+
+        solRes.data?.forEach(s => {
+            const item = {
+                monto: s.monto,
+                fecha: new Date(s.fecha || Date.now()).toISOString().split('T')[0],
+                estado: s.estado,
+                colorClass: s.tipo === 'retiro' ? 'amount-negative' : 'amount-positive'
+            };
+
+            if (s.tipo === 'deposito') {
+                grupos.depositos.items.push(item);
+                if (s.estado === 'completado') grupos.depositos.total += s.monto;
+            } else if (s.tipo === 'retiro') {
+                grupos.retiros.items.push(item);
+                if (s.estado === 'completado') grupos.retiros.total += s.monto;
+            }
+        });
+
+        planRes.data?.forEach(p => {
+            grupos.activaciones.items.push({
+                monto: p.monto_invertido,
+                fecha: new Date(p.fecha_inicio || Date.now()).toISOString().split('T')[0],
+                estado: 'completado',
+                colorClass: 'amount-negative'
+            });
+            grupos.activaciones.total += p.monto_invertido;
+        });
+
+        container.innerHTML = "";
+
+        const renderizarTarjeta = (grupo) => {
+            if (grupo.items.length === 0) return '';
+            grupo.items.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+            let itemsHTML = '';
+            grupo.items.forEach(item => {
+                const iconoEstado = item.estado === 'completado' ? '✓' : '⏳';
+                const claseEstado = item.estado === 'completado' ? 'status-completed' : 'status-pending';
+                itemsHTML += `
+                    <div class="history-item-row">
+                        <span class="history-amount ${item.colorClass}">${item.monto.toFixed(2)}$</span>
+                        <span class="history-date">${item.fecha}</span>
+                        <span class="history-status ${claseEstado}">${iconoEstado} ${item.estado}</span>
+                    </div>`;
+            });
+
+            return `
+                <div class="history-group-card">
+                    <div class="history-card-header">
+                        <div class="history-card-title">${grupo.icono} ${grupo.titulo}</div>
+                        <div class="history-card-total">Total: <strong>${grupo.total.toFixed(2)}$</strong></div>
+                    </div>
+                    <div class="history-items-list">${itemsHTML}</div>
+                </div>`;
+        };
+
+        container.innerHTML += renderizarTarjeta(grupos.depositos);
+        container.innerHTML += renderizarTarjeta(grupos.retiros);
+        container.innerHTML += renderizarTarjeta(grupos.activaciones);
+
+        if (container.innerHTML === "") container.innerHTML = "<p style='text-align:center; color:white;'>Sin movimientos.</p>";
+
+    } catch (e) {
+        container.innerHTML = "<p style='text-align:center; color:#f85149;'>Error al cargar.</p>";
+    }
 }
 
 async function invertir(costo) {
@@ -147,21 +208,17 @@ async function cargarAdmin() {
     pendientes?.forEach(s => {
         const esDep = s.tipo === 'deposito';
         const color = esDep ? '#3fb950' : '#f85149';
-        
         const btnCopiar = (txt) => `<button onclick="navigator.clipboard.writeText('${txt}'); alert('Copiado');" style="background:#30363d; border:none; color:#c9d1d9; font-size:0.7em; padding:2px 5px; border-radius:3px; cursor:pointer; margin-left:5px;">Copiar</button>`;
-
         const item = `
             <div class="admin-card-mini" style="border-left: 4px solid ${color}; background: #161b22; padding: 10px; margin-bottom: 12px; border-radius: 4px;">
                 <div style="font-size:0.75em; color:#8b949e; margin-bottom:5px;">
                     <strong>USER:</strong> ${s.id_telegram}<br>
                     <strong>DATO USUARIO:</strong> <span style="color:#e6edf3; word-break: break-all;">${s.detalles}</span> ${btnCopiar(s.detalles)}
                 </div>
-                
                 <div style="margin: 8px 0;">
                     <span style="color:#8b949e; font-size:0.8em;">MONTO SOLICITADO:</span><br>
-                    <strong style="font-size: 1.4em; color: ${color};">$${s.monto.toFixed(2)}</strong> ${btnCopiar(s.monto)}
+                    <strong style="font-size: 1.4em; color: ${color};">$${s.monto.toFixed(2)}</strong>
                 </div>
-                
                 ${esDep ? `
                     <label style="font-size:0.7em; color:#8b949e;">Monto Real Recibido ($):</label>
                     <input type="number" id="input-monto-${s.id}" value="${s.monto}" 
@@ -171,13 +228,11 @@ async function cargarAdmin() {
                     <input type="text" id="input-hash-${s.id}" placeholder="Pega el hash de la TX" 
                            style="width:94%; background:#0d1117; color:white; border:1px solid #30363d; padding:5px; margin-bottom:8px; border-radius:4px;">
                 `}
-                
                 <button style="background:${color}; width:100%; border:none; color:white; padding:8px; border-radius:4px; font-weight:bold; cursor:pointer;" 
                         onclick="gestionarSolicitud('${s.id}','${s.tipo}','${s.id_telegram}')">
                     APROBAR ${s.tipo.toUpperCase()}
                 </button>
             </div>`;
-        
         if(esDep) depDiv.innerHTML += item; else retDiv.innerHTML += item;
     });
 
@@ -185,12 +240,10 @@ async function cargarAdmin() {
     procesados?.forEach(p => {
         const esDep = p.tipo === 'deposito';
         const color = esDep ? '#3fb950' : '#f85149';
-        const label = esDep ? '📥 DEPÓSITO' : '📤 RETIRO';
-        
         procDiv.innerHTML += `
             <div style="border-bottom:1px solid #30363d; padding:10px 0; font-size:0.85em;">
                 <div style="display:flex; justify-content:space-between;">
-                    <strong style="color:${color}">${label}</strong>
+                    <strong style="color:${color}">${esDep ? '📥 DEPÓSITO' : '📤 RETIRO'}</strong>
                     <span style="color:#8b949e;">${p.estado}</span>
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-top:3px;">
@@ -209,32 +262,23 @@ async function gestionarSolicitud(id, tipo, targetUid) {
         if (tipo === 'deposito') {
             const montoConfirmado = parseFloat(document.getElementById(`input-monto-${id}`).value);
             if (isNaN(montoConfirmado) || montoConfirmado <= 0) return alert("Monto inválido.");
-            
             if (!confirm(`¿Confirmar depósito de $${montoConfirmado.toFixed(2)}?`)) return;
-            
             await supabaseClient.from('usuarios').update({ 
                 saldo_deposito: (user.saldo_deposito || 0) + montoConfirmado 
             }).eq('id_telegram', targetUid);
-            
             updateData.monto = montoConfirmado; 
         } else {
             const hashAdmin = document.getElementById(`input-hash-${id}`).value;
             if (hashAdmin.length < 10) return alert("Debes ingresar el Hash de la transferencia realizada.");
-            
-            if (!confirm("¿Ya enviaste el dinero? Esta acción registrará el hash y cerrará la solicitud.")) return;
-            
+            if (!confirm("¿Ya enviaste el dinero?")) return;
             updateData.detalles = "HASH PAGO: " + hashAdmin; 
         }
 
         const { error } = await supabaseClient.from('solicitudes').update(updateData).eq('id', id);
         if (error) throw error;
-
-        alert("¡Transacción verificada y completada!");
+        alert("¡Transacción completada!");
         cargarAdmin();
-    } catch (e) { 
-        console.error(e);
-        alert("Error al procesar: " + e.message); 
-    }
+    } catch (e) { alert("Error: " + e.message); }
 }
 
 async function verifyTx() {
@@ -242,8 +286,7 @@ async function verifyTx() {
     const monto = parseFloat(document.getElementById('dep-amount').value) || 0;
     if (hash.length < 5 || monto <= 0) return alert("Hash o monto inválido.");
     await supabaseClient.from('solicitudes').insert([{ id_telegram: userId, tipo: 'deposito', detalles: hash, estado: 'pendiente', monto: monto }]);
-    alert("Depósito informado. Espera la validación del administrador."); 
-    nav('section-home');
+    alert("Depósito informado."); nav('section-home');
 }
 
 function copyWallet() { navigator.clipboard.writeText("0xd6fe607116c1df2b4dae56e77ffdae50cde9d153"); alert("Billetera copiada"); }
