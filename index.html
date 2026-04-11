@@ -175,10 +175,18 @@
 
         <section id="section-withdraw" style="display:none;">
             <h3 class="title-center">Retirar Ganancias</h3>
-            <div class="card">
-                <small class="balance-label">Disponible:</small>
-                <div class="price" id="withdraw-available" style="font-size:1.8em">$0.00</div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                <div class="card">
+                    <small class="balance-label">Disponible:</small>
+                    <div class="price" id="withdraw-available" style="font-size:1.4em; color: #3fb950;">$0.00</div>
+                </div>
+                <div class="card" style="border-color: #f8514933;">
+                    <small class="balance-label">Total Retirado:</small>
+                    <div class="price" id="total-retirado-display" style="font-size:1.4em; color: #f85149;">$0.00</div>
+                </div>
             </div>
+
             <div class="input-group">
                 <input type="number" id="withdraw-amount" placeholder="Monto (Min $5)">
             </div>
