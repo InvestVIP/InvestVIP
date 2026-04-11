@@ -35,12 +35,22 @@
                 <div id="home-estimado-diario" class="price-neon">$0.00</div>
             </div>
 
-            <div class="card" style="margin-top: 15px; border-color: #f7931a33; background: rgba(247, 147, 26, 0.03); text-align: left;">
-                <small class="balance-label" style="color: #f7931a;">🎁 PROGRAMA DE REFERIDOS (2%)</small>
-                <p style="font-size: 0.7em; color: #8b949e; margin: 5px 0;">Gana el 2% de cada plan que activen tus invitados.</p>
-                <div class="copy-container" onclick="copiarLinkReferido()" style="margin-top: 10px; background: #0d1117; border-style: solid;">
-                    <code id="referral-link" style="font-size: 0.7em; color: #f7931a; word-break: break-all;">Generando link...</code>
-                    <div style="font-size: 0.6em; color: #58a6ff; margin-top: 5px; font-weight: bold; text-align: center;">TAP PARA COPIAR</div>
+            <div class="referral-card">
+                <div class="referral-title">
+                    <span>👥</span> PROGRAMA DE REFERIDOS
+                </div>
+                
+                <p style="font-size: 0.75em; color: #8b949e; margin: 5px 0;">
+                    Gana el <strong>2%</strong> de cada plan que activen tus invitados de por vida.
+                </p>
+
+                <div class="referral-link-box">
+                    <code id="referral-link">Generando enlace...</code>
+                    <button class="btn-copy-ref" onclick="copiarLinkReferido()">COPIAR LINK DE INVITACIÓN</button>
+                </div>
+
+                <div class="ref-benefit-badge">
+                    Comisión actual: 2% 🔥
                 </div>
             </div>
 
