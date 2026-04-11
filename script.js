@@ -4,6 +4,10 @@ const SUPABASE_KEY = 'sb_publishable_7UtlHB8x21aypLw2rCHoTQ_qBQ_TFkz';
 let supabaseClient;
 const tg = window.Telegram.WebApp;
 
+// CONFIGURACIÓN DEL BOT (Asegúrate de que coincidan con tu bot de Telegram)
+const BOT_USERNAME = "InvestVipSupport_bot"; // Cambia por el nombre de tu bot sin el @
+const APP_SHORTNAME = "app"; // Cambia por el short_name de tu WebApp en BotFather
+
 function iniciarApp() {
     if (!window.supabase) { setTimeout(iniciarApp, 100); return; }
     supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } });
@@ -58,9 +62,9 @@ async function cargarDatos() {
         let { data: u } = await supabaseClient.from('usuarios').select('*').eq('id_telegram', userId).maybeSingle();
         
         if (!u) {
-            // Capturamos el parámetro 'start' de Telegram para el sistema de referidos
+            // Capturamos el parámetro de referido desde Telegram (startapp)
             const urlParams = new URLSearchParams(window.location.search);
-            const invitadorId = urlParams.get('tgWebAppStartParam'); 
+            let invitadorId = tg.initDataUnsafe?.start_param || urlParams.get('tgWebAppStartParam'); 
 
             const { data: n, error } = await supabaseClient.from('usuarios').insert([{ 
                 id_telegram: userId, 
@@ -74,12 +78,25 @@ async function cargarDatos() {
             u = n;
         }
 
+        // Mostrar datos en pantalla
         document.getElementById('username').innerText = userName;
         document.getElementById('home-saldo-deposito').innerText = (u.saldo_deposito || 0).toFixed(2);
         document.getElementById('home-saldo-retirable').innerText = (u.saldo_retirable || 0).toFixed(2);
         document.getElementById('withdraw-available').innerText = "$" + (u.saldo_retirable || 0).toFixed(2);
+        
+        // Generar Link de Referido
+        const refLink = `https://t.me/${BOT_USERNAME}/${APP_SHORTNAME}?startapp=${userId}`;
+        const linkElem = document.getElementById('referral-link');
+        if (linkElem) linkElem.innerText = refLink;
+
         actualizarMisPlanes();
     } catch (e) { console.error("Error en cargarDatos:", e); }
+}
+
+function copiarLinkReferido() {
+    const link = document.getElementById('referral-link').innerText;
+    navigator.clipboard.writeText(link);
+    alert("¡Link de invitado copiado!");
 }
 
 async function actualizarMisPlanes() {
@@ -120,7 +137,6 @@ async function cargarHistorialUnificado() {
                 colorClass: s.tipo === 'retiro' ? 'amount-negative' : 'amount-positive'
             };
 
-            // Incluimos las ganancias por referido en la sección de depósitos/ingresos
             if (s.tipo === 'deposito' || s.tipo === 'referido') {
                 grupos.depositos.items.push(item);
                 if (s.estado === 'completado') grupos.depositos.total += s.monto;
