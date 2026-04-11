@@ -73,7 +73,6 @@ button[onclick*="navigator.clipboard"] {
     border: 1px solid #30363d !important;
 }
 button[onclick*="navigator.clipboard"]:active { background: #58a6ff !important; color: white !important; transform: scale(0.92); }
-
 .admin-card-mini input { margin: 8px 0 !important; padding: 8px !important; font-size: 0.9em; }
 
 span[style*="word-break: break-all"] {
@@ -85,7 +84,6 @@ span[style*="word-break: break-all"] {
 }
 
 #admin-historial-procesados > div:hover { background: #161b22; transition: background 0.3s; }
-
 .input-group small { display: block; margin-top: -10px; margin-bottom: 15px; margin-left: 5px; }
 
 /* --- Animaciones --- */
@@ -99,79 +97,99 @@ span[style*="word-break: break-all"] {
 /* NUEVOS ESTILOS PARA EL HISTORIAL UNIFICADO */
 /* ========================================== */
 
-.history-main-container {
-    padding: 10px 5px;
-}
-
+.history-main-container { padding: 10px 5px; }
 .history-group-card {
-    background: #ffffff;
+    background: #1c2128; /* Cambiado a oscuro para coincidir con tu app */
+    border: 1px solid #30363d;
     border-radius: 12px;
     margin-bottom: 20px;
     padding: 15px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.3);
 }
-
 .history-card-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid #eeeeee;
+    border-bottom: 1px solid #30363d;
     padding-bottom: 10px;
     margin-bottom: 10px;
 }
-
-.history-card-title {
-    color: #1c2128;
-    font-weight: bold;
-    font-size: 0.9em;
-}
-
-.history-card-total {
-    color: #444444;
-    font-size: 0.85em;
-}
-
-.history-card-total strong {
-    color: #238636;
-}
-
+.history-card-title { color: #58a6ff; font-weight: bold; font-size: 0.9em; }
+.history-card-total { color: #8b949e; font-size: 0.85em; }
+.history-card-total strong { color: #3fb950; }
 .history-item-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 8px 0;
-    border-bottom: 1px solid #f9f9f9;
+    border-bottom: 1px solid #0d1117;
 }
+.history-item-row:last-child { border-bottom: none; }
+.history-amount { font-weight: bold; font-size: 0.95em; width: 30%; }
+.amount-positive { color: #3fb950; }
+.amount-negative { color: #f85149; }
+.history-date { color: #8b949e; font-size: 0.75em; width: 35%; text-align: center; }
+.history-status { font-size: 0.7em; font-weight: bold; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; width: 35%; text-align: right; }
+.status-completed { color: #3fb950; }
+.status-pending { color: #f7931a; }
 
-.history-item-row:last-child {
-    border-bottom: none;
-}
-
-.history-amount {
-    font-weight: bold;
-    font-size: 0.95em;
-    width: 30%;
-}
-
-.amount-positive { color: #238636; }
-.amount-negative { color: #d73a49; }
-
-.history-date {
-    color: #8b949e;
-    font-size: 0.75em;
-    width: 35%;
+/* ========================================== */
+/* ESTILOS PARA EL SISTEMA DE REFERIDOS       */
+/* ========================================== */
+.referral-card {
+    background: linear-gradient(145deg, #1c2128, #161b22);
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 15px;
+    margin: 15px 0;
     text-align: center;
 }
-
-.history-status {
-    font-size: 0.7em;
+.referral-title {
+    color: #58a6ff;
+    font-size: 0.9em;
     font-weight: bold;
-    padding: 2px 6px;
-    border-radius: 4px;
-    text-transform: uppercase;
-    width: 35%;
-    text-align: right;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
-
-.status-completed { color: #238636; }
-.status-pending { color: #f7931a; }
+.referral-link-box {
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 12px;
+    margin: 10px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+#referral-link {
+    font-family: monospace;
+    font-size: 0.82em;
+    color: #8b949e;
+    word-break: break-all;
+}
+.btn-copy-ref {
+    background: rgba(88, 166, 255, 0.1);
+    color: #58a6ff;
+    border: 1px solid #58a6ff;
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 0.8em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.btn-copy-ref:active { transform: scale(0.95); background: #58a6ff; color: white; }
+.ref-benefit-badge {
+    display: inline-block;
+    background: rgba(63, 185, 80, 0.1);
+    color: #3fb950;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75em;
+    margin-top: 10px;
+    border: 1px solid rgba(63, 185, 80, 0.3);
+}
+#btn-admin-tab { border-top: 2px solid #f85149; display: none; }
