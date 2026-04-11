@@ -5,7 +5,7 @@ let supabaseClient;
 const tg = window.Telegram.WebApp;
 
 // CONFIGURACIÓN DEL BOT (Asegúrate de que coincidan con tu bot de Telegram)
-const BOT_USERNAME = "InvestVipSupport_bot"; // Cambia por el nombre de tu bot sin el @
+const BOT_USERNAME = "InvestVipMiner_bot"; // Actualizado al bot principal
 const APP_SHORTNAME = "app"; // Cambia por el short_name de tu WebApp en BotFather
 
 function iniciarApp() {
@@ -93,10 +93,28 @@ async function cargarDatos() {
     } catch (e) { console.error("Error en cargarDatos:", e); }
 }
 
+// FUNCIÓN DE COPIADO ACTUALIZADA CON FEEDBACK VISUAL
 function copiarLinkReferido() {
     const link = document.getElementById('referral-link').innerText;
-    navigator.clipboard.writeText(link);
-    alert("¡Link de invitado copiado!");
+    if (!link || link.includes("Generando")) return;
+
+    navigator.clipboard.writeText(link).then(() => {
+        const btn = document.querySelector('.btn-copy-ref');
+        if (btn) {
+            const originalText = btn.innerText;
+            btn.innerText = "¡COPIADO!";
+            btn.style.background = "#238636";
+            btn.style.color = "white";
+            
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.style.background = ""; // Vuelve al CSS original
+                btn.style.color = "";
+            }, 2000);
+        } else {
+            alert("¡Link de invitado copiado!");
+        }
+    });
 }
 
 async function actualizarMisPlanes() {
