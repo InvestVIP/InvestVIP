@@ -286,7 +286,7 @@ async function invertir(costo) {
 async function procesarRetiro() {
     const monto = parseFloat(document.getElementById('withdraw-amount').value);
     const wallet = document.getElementById('withdraw-wallet').value;
-    if (!wallet || monto < 5) return alert("Monto mínimo $5.");
+    if (!wallet || isNaN(monto) || monto < 5) return alert("Monto mínimo $5.");
 
     let { data: ultimaSol } = await supabaseClient.from('solicitudes').select('fecha').eq('id_telegram', userId).eq('tipo', 'retiro').order('fecha', { ascending: false }).limit(1);
     
@@ -298,10 +298,29 @@ async function procesarRetiro() {
     }
 
     let { data: u } = await supabaseClient.from('usuarios').select('saldo_retirable').eq('id_telegram', userId).single();
+    
+    // --- CORRECCIÓN: Restar saldo antes de enviar la solicitud ---
     if (u?.saldo_retirable >= monto) {
-        await supabaseClient.from('solicitudes').insert([{ id_telegram: userId, tipo: 'retiro', monto: monto, detalles: wallet, estado: 'pendiente' }]);
-        alert("Solicitud enviada."); cargarDatos(); nav('section-home');
-    } else alert("Saldo insuficiente.");
+        const { error: updateError } = await supabaseClient.from('usuarios').update({ 
+            saldo_retirable: u.saldo_retirable - monto 
+        }).eq('id_telegram', userId);
+
+        if (updateError) return alert("Error al procesar el saldo.");
+
+        await supabaseClient.from('solicitudes').insert([{ 
+            id_telegram: userId, 
+            tipo: 'retiro', 
+            monto: monto, 
+            detalles: wallet, 
+            estado: 'pendiente' 
+        }]);
+
+        alert("Solicitud enviada y saldo descontado."); 
+        cargarDatos(); 
+        nav('section-home');
+    } else {
+        alert("Saldo insuficiente.");
+    }
 }
 
 async function cargarAdmin() {
