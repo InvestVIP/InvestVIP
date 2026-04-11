@@ -99,7 +99,7 @@ span[style*="word-break: break-all"] {
 
 .history-main-container { padding: 10px 5px; }
 .history-group-card {
-    background: #1c2128; /* Cambiado a oscuro para coincidir con tu app */
+    background: #1c2128; 
     border: 1px solid #30363d;
     border-radius: 12px;
     margin-bottom: 20px;
@@ -167,7 +167,7 @@ span[style*="word-break: break-all"] {
 #referral-link {
     font-family: monospace;
     font-size: 0.82em;
-    color: #8b949e;
+    color: #f7931a; /* Cambiado a naranja para resaltar el link */
     word-break: break-all;
 }
 .btn-copy-ref {
@@ -179,9 +179,10 @@ span[style*="word-break: break-all"] {
     font-size: 0.8em;
     font-weight: bold;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.3s ease; /* Transición más suave para el cambio de color */
 }
-.btn-copy-ref:active { transform: scale(0.95); background: #58a6ff; color: white; }
+.btn-copy-ref:active { transform: scale(0.95); }
+
 .ref-benefit-badge {
     display: inline-block;
     background: rgba(63, 185, 80, 0.1);
