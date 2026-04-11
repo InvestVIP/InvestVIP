@@ -4,9 +4,8 @@ const SUPABASE_KEY = 'sb_publishable_7UtlHB8x21aypLw2rCHoTQ_qBQ_TFkz';
 let supabaseClient;
 const tg = window.Telegram.WebApp;
 
-// CONFIGURACIÓN DEL BOT (Asegúrate de que coincidan con tu bot de Telegram)
-const BOT_USERNAME = "InvestVipMiner_bot"; // Actualizado al bot principal
-const APP_SHORTNAME = "app"; // Cambia por el short_name de tu WebApp en BotFather
+const BOT_USERNAME = "InvestVipMiner_bot"; 
+const APP_SHORTNAME = "app"; 
 
 function iniciarApp() {
     if (!window.supabase) { setTimeout(iniciarApp, 100); return; }
@@ -53,7 +52,7 @@ function iniciarRelojPagos() {
 }
 
 // ==========================================
-// CARGAR DATOS (CON CAPTURA DE REFERIDO)
+// CARGAR DATOS (MODIFICADO PARA MOSTRAR TOTAL RETIRADO)
 // ==========================================
 async function cargarDatos() {
     try {
@@ -62,7 +61,6 @@ async function cargarDatos() {
         let { data: u } = await supabaseClient.from('usuarios').select('*').eq('id_telegram', userId).maybeSingle();
         
         if (!u) {
-            // Capturamos el parámetro de referido desde Telegram (startapp)
             const urlParams = new URLSearchParams(window.location.search);
             let invitadorId = tg.initDataUnsafe?.start_param || urlParams.get('tgWebAppStartParam'); 
 
@@ -70,21 +68,25 @@ async function cargarDatos() {
                 id_telegram: userId, 
                 saldo_deposito: 0, 
                 saldo_retirable: 0,
-                referido_por: invitadorId, // Vinculamos al invitador
-                es_inversionista: false    // Estado inicial
+                referido_por: invitadorId,
+                es_inversionista: false    
             }]).select().single();
             
             if (error) throw error;
             u = n;
         }
 
-        // Mostrar datos en pantalla
         document.getElementById('username').innerText = userName;
         document.getElementById('home-saldo-deposito').innerText = (u.saldo_deposito || 0).toFixed(2);
         document.getElementById('home-saldo-retirable').innerText = (u.saldo_retirable || 0).toFixed(2);
         document.getElementById('withdraw-available').innerText = "$" + (u.saldo_retirable || 0).toFixed(2);
         
-        // Generar Link de Referido
+        // --- MOSTRAR TOTAL RETIRADO EN PESTAÑA RETIROS ---
+        const displayTotal = document.getElementById('total-retirado-display');
+        if (displayTotal) {
+            displayTotal.innerText = "$" + (u.total_retirado || 0).toFixed(2);
+        }
+
         const refLink = `https://t.me/${BOT_USERNAME}/${APP_SHORTNAME}?startapp=${userId}`;
         const linkElem = document.getElementById('referral-link');
         if (linkElem) linkElem.innerText = refLink;
@@ -93,7 +95,6 @@ async function cargarDatos() {
     } catch (e) { console.error("Error en cargarDatos:", e); }
 }
 
-// FUNCIÓN DE COPIADO ACTUALIZADA CON FEEDBACK VISUAL
 function copiarLinkReferido() {
     const link = document.getElementById('referral-link').innerText;
     if (!link || link.includes("Generando")) return;
@@ -108,7 +109,7 @@ function copiarLinkReferido() {
             
             setTimeout(() => {
                 btn.innerText = originalText;
-                btn.style.background = ""; // Vuelve al CSS original
+                btn.style.background = ""; 
                 btn.style.color = "";
             }, 2000);
         } else {
@@ -232,22 +233,17 @@ async function cargarHistorialUnificado() {
     }
 }
 
-// ==========================================
-// INVERTIR CON LÓGICA DE REFERIDOS (2%)
-// ==========================================
 async function invertir(costo) {
     let { data: u } = await supabaseClient.from('usuarios').select('*').eq('id_telegram', userId).single();
     if (u?.saldo_deposito >= costo) {
         let n = costo===11?"Bronce":costo===30?"Plata":costo===60?"Oro":"VIP";
         let g = costo===11?0.65:costo===30?1.66:costo===60?3.00:6.30;
         
-        // 1. Descontar saldo y activar estado de inversionista
         await supabaseClient.from('usuarios').update({ 
             saldo_deposito: u.saldo_deposito - costo,
             es_inversionista: true 
         }).eq('id_telegram', userId);
 
-        // 2. Insertar el plan activo
         await supabaseClient.from('planes_activos').insert([{ 
             id_telegram: userId, 
             nombre_plan: n, 
@@ -257,14 +253,10 @@ async function invertir(costo) {
             fecha_inicio: new Date().toISOString() 
         }]);
 
-        // 3. PAGO AL REFERIDOR (2%)
         if (u.referido_por) {
             let { data: invitador } = await supabaseClient.from('usuarios').select('*').eq('id_telegram', u.referido_por).single();
-            
-            // Regla: Paga si el invitador es inversionista activo
             if (invitador && invitador.es_inversionista) {
                 const comision = costo * 0.02;
-                
                 await supabaseClient.from('usuarios').update({ 
                     saldo_retirable: (invitador.saldo_retirable || 0) + comision 
                 }).eq('id_telegram', u.referido_por);
@@ -299,7 +291,6 @@ async function procesarRetiro() {
 
     let { data: u } = await supabaseClient.from('usuarios').select('saldo_retirable').eq('id_telegram', userId).single();
     
-    // --- CORRECCIÓN: Restar saldo antes de enviar la solicitud ---
     if (u?.saldo_retirable >= monto) {
         const { error: updateError } = await supabaseClient.from('usuarios').update({ 
             saldo_retirable: u.saldo_retirable - monto 
@@ -383,15 +374,22 @@ async function cargarAdmin() {
     });
 }
 
+// ==========================================
+// GESTIONAR SOLICITUD (MODIFICADO PARA SUMAR TOTAL_RETIRADO)
+// ==========================================
 async function gestionarSolicitud(id, tipo, targetUid) {
     try {
         let updateData = { estado: 'completado' };
+        
+        // 1. Obtener datos actuales del usuario y la solicitud
         let { data: user } = await supabaseClient.from('usuarios').select('*').eq('id_telegram', targetUid).single();
+        let { data: solicitud } = await supabaseClient.from('solicitudes').select('*').eq('id', id).single();
 
         if (tipo === 'deposito') {
             const montoConfirmado = parseFloat(document.getElementById(`input-monto-${id}`).value);
             if (isNaN(montoConfirmado) || montoConfirmado <= 0) return alert("Monto inválido.");
             if (!confirm(`¿Confirmar depósito de $${montoConfirmado.toFixed(2)}?`)) return;
+            
             await supabaseClient.from('usuarios').update({ 
                 saldo_deposito: (user.saldo_deposito || 0) + montoConfirmado 
             }).eq('id_telegram', targetUid);
@@ -400,11 +398,18 @@ async function gestionarSolicitud(id, tipo, targetUid) {
             const hashAdmin = document.getElementById(`input-hash-${id}`).value;
             if (hashAdmin.length < 10) return alert("Debes ingresar el Hash de la transferencia realizada.");
             if (!confirm("¿Ya enviaste el dinero?")) return;
+            
             updateData.detalles = "HASH PAGO: " + hashAdmin; 
+
+            // --- ACTUALIZAR COLUMNA TOTAL_RETIRADO ---
+            await supabaseClient.from('usuarios').update({ 
+                total_retirado: (user.total_retirado || 0) + solicitud.monto 
+            }).eq('id_telegram', targetUid);
         }
 
         const { error } = await supabaseClient.from('solicitudes').update(updateData).eq('id', id);
         if (error) throw error;
+        
         alert("¡Transacción completada!");
         cargarAdmin();
     } catch (e) { alert("Error: " + e.message); }
