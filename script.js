@@ -91,15 +91,11 @@ async function cargarDatos() {
     } catch (e) { console.error("Error en cargarDatos:", e); }
 }
 
-// ==========================================
-// FUNCIÓN DE CANJE DE CUPONES (AÑADIDA)
-// ==========================================
 async function canjearCupon() {
     const code = document.getElementById('coupon-input').value.trim().toUpperCase();
     if (!code) return alert("Por favor, ingresa un código.");
 
     try {
-        // 1. Verificar si el cupón existe y tiene cupos
         let { data: cupon, error: errC } = await supabaseClient
             .from('cupones')
             .select('*')
@@ -110,7 +106,6 @@ async function canjearCupon() {
         if (!cupon) return alert("El código ingresado no es válido o ya expiró.");
         if (cupon.usos_actuales >= cupon.usos_maximos) return alert("¡Oh no! Este código ya alcanzó su límite de canjes.");
 
-        // 2. Verificar si el usuario ya lo usó
         let { data: yaUsado } = await supabaseClient
             .from('cupones_historial')
             .select('*')
@@ -120,26 +115,21 @@ async function canjearCupon() {
 
         if (yaUsado) return alert("Ya has canjeado este código anteriormente.");
 
-        // 3. Procesar el canje
         let { data: user } = await supabaseClient.from('usuarios').select('saldo_retirable').eq('id_telegram', userId).single();
         
-        // Sumar saldo al usuario
         await supabaseClient.from('usuarios').update({ 
             saldo_retirable: (user.saldo_retirable || 0) + cupon.valor 
         }).eq('id_telegram', userId);
 
-        // Aumentar contador del cupón
         await supabaseClient.from('cupones').update({ 
             usos_actuales: cupon.usos_actuales + 1 
         }).eq('id', cupon.id);
 
-        // Registrar en historial de cupones
         await supabaseClient.from('cupones_historial').insert([{ 
             id_telegram: userId, 
             id_cupon: cupon.id 
         }]);
 
-        // Registrar en tabla solicitudes para el historial visual del usuario
         await supabaseClient.from('solicitudes').insert([{ 
             id_telegram: userId, 
             tipo: 'referido', 
@@ -490,6 +480,58 @@ async function verifyTx() {
     if (hash.length < 5 || monto <= 0) return alert("Hash o monto inválido.");
     await supabaseClient.from('solicitudes').insert([{ id_telegram: userId, tipo: 'deposito', detalles: hash, estado: 'pendiente', monto: monto }]);
     alert("Depósito informado."); nav('section-home');
+}
+
+// ==========================================
+// FUNCIÓN DE DIFUSIÓN GLOBAL (NUEVA)
+// ==========================================
+async function enviarCampanaGlobal() {
+    const status = document.getElementById('progreso-envio');
+    if (!confirm("¿Estás seguro de enviar la notificación de aniversario a TODOS los usuarios?")) return;
+
+    try {
+        status.innerText = "⏳ Consultando usuarios...";
+        // Obtener lista de todos los IDs de telegram registrados
+        const { data: usuarios, error } = await supabaseClient
+            .from('usuarios')
+            .select('id_telegram');
+
+        if (error) throw error;
+        if (!usuarios || usuarios.length === 0) return alert("No hay usuarios registrados.");
+
+        status.innerText = `🚀 Enviando a ${usuarios.length} usuarios...`;
+
+        // Iterar y enviar (puedes ajustar el mensaje aquí)
+        let enviados = 0;
+        for (const u of usuarios) {
+            try {
+                // Usamos el API de Telegram para enviar el mensaje mediante tu Bot
+                // Nota: El usuario debe haber iniciado el bot previamente
+                const mensaje = "🎊 ¡SEMANA ANIVERSARIO EN INVESTVIP! 🎊\n\nLanzaremos códigos limitados por el canal oficial. ¡Mantente atento para reclamar tu bono!";
+                
+                await fetch(`https://api.telegram.org/bot7877292276:AAH3k_XzB0oVlT2e2F_r-S0B1zO6_R0XpXw/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: u.id_telegram,
+                        text: mensaje,
+                        parse_mode: 'HTML'
+                    })
+                });
+                enviados++;
+            } catch (err) {
+                console.error(`Error enviando a ${u.id_telegram}:`, err);
+            }
+        }
+
+        status.innerText = `✅ ¡Difusión finalizada! (${enviados} enviados)`;
+        alert("Campaña completada con éxito.");
+
+    } catch (e) {
+        console.error(e);
+        status.innerText = "❌ Error en la difusión.";
+        alert("Error al procesar la difusión: " + e.message);
+    }
 }
 
 function copyWallet() { navigator.clipboard.writeText("0xd6fe607116c1df2b4dae56e77ffdae50cde9d153"); alert("Billetera copiada"); }
