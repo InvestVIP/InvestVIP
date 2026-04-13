@@ -483,7 +483,7 @@ async function verifyTx() {
 }
 
 // ==========================================
-// FUNCIÓN DE DIFUSIÓN GLOBAL (TOKEN CORREGIDO)
+// FUNCIÓN DE DIFUSIÓN GLOBAL (MENSAJE ACTUALIZADO)
 // ==========================================
 async function enviarCampanaGlobal() {
     const status = document.getElementById('progreso-envio');
@@ -506,7 +506,8 @@ async function enviarCampanaGlobal() {
         let enviados = 0;
         for (const u of usuarios) {
             try {
-                const mensaje = `🚨 <b>¡AVISO EXCLUSIVO: ACCESO LIMITADO!</b> 🚨\n\nNuestra <b>SEMANA ANIVERSARIO</b> ha comenzado y las recompensas no esperan. 🎊\n\nEstamos soltando <b>CÓDIGOS DE SALDO RETIRABLE</b> de forma aleatoria en nuestro canal oficial. Solo los más rápidos podrán canjearlos.\n\n⚠️ <b>¿Ya tienes el tuyo?</b>\nNo te quedes fuera de la repartición global.\n\n👉 <a href='https://t.me/InvestVipMiner_Canal'>¡ENTRAR AL CANAL AHORA!</a>`;
+                // REDACCIÓN EXACTA SOLICITADA
+                const mensaje = `🎁 <b>¡ESTAMOS EN SEMANA ANIVERSARIO!</b> 🎁\n\nPara celebrar esta semana especial, activa el código exclusivo: <b>ANIVERSARIO1</b> en la sección de Cupones.\n\n🚀 <b>LANZAMIENTO OFICIAL: PLAN PLATINO</b>\n¡Ya disponible! Aprovecha el nuevo Plan Platino que otorga un <b>CASHBACK INMEDIATO del 7.5% ($30.00)</b> directo a tu saldo.\n\n⚡ <b>ROI ACELERADO:</b> Es nuestro plan con el retorno de inversión más rápido diseñado hasta hoy. ¡Maximiza tus ganancias en esta semana de celebración!\n\nVálido solo por tiempo limitado.`;
                 
                 await fetch(`https://api.telegram.org/bot${CORRECT_TOKEN}/sendMessage`, {
                     method: 'POST',
