@@ -40,7 +40,7 @@ body { background: #0b0e14; color: white; font-family: sans-serif; margin: 0; pa
 .border-plata { border-left: 5px solid #c0c0c0; }
 .border-oro { border-left: 5px solid #ffd700; }
 .border-vip { border-left: 5px solid #00ffcc; }
-.border-platino { border-left: 5px solid #e5e4e2; } /* Nuevo: Color platino */
+.border-platino { border-left: 5px solid #e5e4e2; } 
 
 /* --- Panel Admin --- */
 .admin-grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -195,3 +195,37 @@ span[style*="word-break: break-all"] {
     border: 1px solid rgba(63, 185, 80, 0.3);
 }
 #btn-admin-tab { border-top: 2px solid #f85149; display: none; }
+
+/* ========================================== */
+/* NUEVOS ESTILOS PARA CUPONES                */
+/* ========================================== */
+.coupon-section {
+    background: #161b22;
+    border: 1px dashed #f7931a;
+    padding: 15px;
+    border-radius: 12px;
+    margin: 15px 0;
+    text-align: center;
+}
+.coupon-input-container {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+.coupon-input-container input {
+    margin: 0;
+    text-transform: uppercase;
+    font-family: monospace;
+    letter-spacing: 2px;
+}
+.btn-coupon {
+    background: #f7931a;
+    color: white;
+    border: none;
+    padding: 0 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 0.8em;
+}
+.btn-coupon:active { transform: scale(0.95); }
