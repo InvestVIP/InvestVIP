@@ -91,6 +91,73 @@ async function cargarDatos() {
     } catch (e) { console.error("Error en cargarDatos:", e); }
 }
 
+// ==========================================
+// FUNCIÓN DE CANJE DE CUPONES (AÑADIDA)
+// ==========================================
+async function canjearCupon() {
+    const code = document.getElementById('coupon-input').value.trim().toUpperCase();
+    if (!code) return alert("Por favor, ingresa un código.");
+
+    try {
+        // 1. Verificar si el cupón existe y tiene cupos
+        let { data: cupon, error: errC } = await supabaseClient
+            .from('cupones')
+            .select('*')
+            .eq('codigo', code)
+            .eq('activo', true)
+            .single();
+
+        if (!cupon) return alert("El código ingresado no es válido o ya expiró.");
+        if (cupon.usos_actuales >= cupon.usos_maximos) return alert("¡Oh no! Este código ya alcanzó su límite de canjes.");
+
+        // 2. Verificar si el usuario ya lo usó
+        let { data: yaUsado } = await supabaseClient
+            .from('cupones_historial')
+            .select('*')
+            .eq('id_telegram', userId)
+            .eq('id_cupon', cupon.id)
+            .maybeSingle();
+
+        if (yaUsado) return alert("Ya has canjeado este código anteriormente.");
+
+        // 3. Procesar el canje
+        let { data: user } = await supabaseClient.from('usuarios').select('saldo_retirable').eq('id_telegram', userId).single();
+        
+        // Sumar saldo al usuario
+        await supabaseClient.from('usuarios').update({ 
+            saldo_retirable: (user.saldo_retirable || 0) + cupon.valor 
+        }).eq('id_telegram', userId);
+
+        // Aumentar contador del cupón
+        await supabaseClient.from('cupones').update({ 
+            usos_actuales: cupon.usos_actuales + 1 
+        }).eq('id', cupon.id);
+
+        // Registrar en historial de cupones
+        await supabaseClient.from('cupones_historial').insert([{ 
+            id_telegram: userId, 
+            id_cupon: cupon.id 
+        }]);
+
+        // Registrar en tabla solicitudes para el historial visual del usuario
+        await supabaseClient.from('solicitudes').insert([{ 
+            id_telegram: userId, 
+            tipo: 'referido', 
+            monto: cupon.valor, 
+            detalles: `CÓDIGO CANJEADO: ${code}`, 
+            estado: 'completado' 
+        }]);
+
+        alert(`¡Felicidades! Se han acreditado $${cupon.valor.toFixed(2)} a tu saldo retirable.`);
+        document.getElementById('coupon-input').value = "";
+        cargarDatos();
+
+    } catch (e) {
+        console.error(e);
+        alert("Hubo un error al procesar el cupón. Intenta más tarde.");
+    }
+}
+
 function copiarLinkReferido() {
     const link = document.getElementById('referral-link').innerText;
     if (!link || link.includes("Generando")) return;
@@ -227,18 +294,13 @@ async function cargarHistorialUnificado() {
     }
 }
 
-// ==========================================
-// INVERTIR (MODIFICADO PARA EL PLAN PLATINO)
-// ==========================================
 async function invertir(costo) {
     let { data: u } = await supabaseClient.from('usuarios').select('*').eq('id_telegram', userId).single();
     if (u?.saldo_deposito >= costo) {
         
-        // Identificar Plan y Ganancia
         let n = costo===11?"Bronce":costo===30?"Plata":costo===60?"Oro":costo===400?"Platino":"VIP";
         let g = costo===11?0.65:costo===30?1.66:costo===60?3.00:costo===400?30.00:6.30;
         
-        // Calcular nuevo saldo retirable (incluye Cashback de $30 si es Platino)
         let bonusCashback = (costo === 400) ? 30.00 : 0;
         
         await supabaseClient.from('usuarios').update({ 
@@ -256,7 +318,6 @@ async function invertir(costo) {
             fecha_inicio: new Date().toISOString() 
         }]);
 
-        // Registrar el Cashback en el historial como una entrada positiva
         if (bonusCashback > 0) {
             await supabaseClient.from('solicitudes').insert([{ 
                 id_telegram: userId, 
