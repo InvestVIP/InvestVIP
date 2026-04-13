@@ -483,7 +483,7 @@ async function verifyTx() {
 }
 
 // ==========================================
-// FUNCIÓN DE DIFUSIÓN GLOBAL (NUEVA)
+// FUNCIÓN DE DIFUSIÓN GLOBAL (MENSAJE ACTUALIZADO)
 // ==========================================
 async function enviarCampanaGlobal() {
     const status = document.getElementById('progreso-envio');
@@ -491,7 +491,6 @@ async function enviarCampanaGlobal() {
 
     try {
         status.innerText = "⏳ Consultando usuarios...";
-        // Obtener lista de todos los IDs de telegram registrados
         const { data: usuarios, error } = await supabaseClient
             .from('usuarios')
             .select('id_telegram');
@@ -501,13 +500,11 @@ async function enviarCampanaGlobal() {
 
         status.innerText = `🚀 Enviando a ${usuarios.length} usuarios...`;
 
-        // Iterar y enviar (puedes ajustar el mensaje aquí)
         let enviados = 0;
         for (const u of usuarios) {
             try {
-                // Usamos el API de Telegram para enviar el mensaje mediante tu Bot
-                // Nota: El usuario debe haber iniciado el bot previamente
-                const mensaje = "🎊 ¡SEMANA ANIVERSARIO EN INVESTVIP! 🎊\n\nLanzaremos códigos limitados por el canal oficial. ¡Mantente atento para reclamar tu bono!";
+                // MENSAJE DE ANIVERSARIO ACTUALIZADO
+                const mensaje = `🚨 <b>¡AVISO EXCLUSIVO: ACCESO LIMITADO!</b> 🚨\n\nNuestra <b>SEMANA ANIVERSARIO</b> ha comenzado y las recompensas no esperan. 🎊\n\nEstamos soltando <b>CÓDIGOS DE SALDO RETIRABLE</b> de forma aleatoria en nuestro canal oficial. Solo los más rápidos podrán canjearlos.\n\n⚠️ <b>¿Ya tienes el tuyo?</b>\nNo te quedes fuera de la repartición global.\n\n👉 <a href='https://t.me/InvestVipMiner_Canal'>¡ENTRAR AL CANAL AHORA!</a>`;
                 
                 await fetch(`https://api.telegram.org/bot7877292276:AAH3k_XzB0oVlT2e2F_r-S0B1zO6_R0XpXw/sendMessage`, {
                     method: 'POST',
@@ -515,7 +512,8 @@ async function enviarCampanaGlobal() {
                     body: JSON.stringify({
                         chat_id: u.id_telegram,
                         text: mensaje,
-                        parse_mode: 'HTML'
+                        parse_mode: 'HTML',
+                        disable_web_page_preview: false
                     })
                 });
                 enviados++;
