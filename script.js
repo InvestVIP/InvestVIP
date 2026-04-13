@@ -483,11 +483,14 @@ async function verifyTx() {
 }
 
 // ==========================================
-// FUNCIÓN DE DIFUSIÓN GLOBAL (MENSAJE ACTUALIZADO)
+// FUNCIÓN DE DIFUSIÓN GLOBAL (TOKEN CORREGIDO)
 // ==========================================
 async function enviarCampanaGlobal() {
     const status = document.getElementById('progreso-envio');
     if (!confirm("¿Estás seguro de enviar la notificación de aniversario a TODOS los usuarios?")) return;
+
+    // TOKEN ACTUALIZADO PARA EL BOT DE INICIO
+    const CORRECT_TOKEN = "8608574146:AAFvkp3XHfyOnjqDISrBBHlbGVdycr0NByo";
 
     try {
         status.innerText = "⏳ Consultando usuarios...";
@@ -503,10 +506,9 @@ async function enviarCampanaGlobal() {
         let enviados = 0;
         for (const u of usuarios) {
             try {
-                // MENSAJE DE ANIVERSARIO ACTUALIZADO
                 const mensaje = `🚨 <b>¡AVISO EXCLUSIVO: ACCESO LIMITADO!</b> 🚨\n\nNuestra <b>SEMANA ANIVERSARIO</b> ha comenzado y las recompensas no esperan. 🎊\n\nEstamos soltando <b>CÓDIGOS DE SALDO RETIRABLE</b> de forma aleatoria en nuestro canal oficial. Solo los más rápidos podrán canjearlos.\n\n⚠️ <b>¿Ya tienes el tuyo?</b>\nNo te quedes fuera de la repartición global.\n\n👉 <a href='https://t.me/InvestVipMiner_Canal'>¡ENTRAR AL CANAL AHORA!</a>`;
                 
-                await fetch(`https://api.telegram.org/bot7877292276:AAH3k_XzB0oVlT2e2F_r-S0B1zO6_R0XpXw/sendMessage`, {
+                await fetch(`https://api.telegram.org/bot${CORRECT_TOKEN}/sendMessage`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
