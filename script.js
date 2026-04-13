@@ -51,9 +51,6 @@ function iniciarRelojPagos() {
     }, 1000);
 }
 
-// ==========================================
-// CARGAR DATOS (MODIFICADO PARA MOSTRAR TOTAL RETIRADO)
-// ==========================================
 async function cargarDatos() {
     try {
         if (userId === "8754466303") document.getElementById('btn-admin-tab').style.display = 'flex';
@@ -81,7 +78,6 @@ async function cargarDatos() {
         document.getElementById('home-saldo-retirable').innerText = (u.saldo_retirable || 0).toFixed(2);
         document.getElementById('withdraw-available').innerText = "$" + (u.saldo_retirable || 0).toFixed(2);
         
-        // --- MOSTRAR TOTAL RETIRADO EN PESTAÑA RETIROS ---
         const displayTotal = document.getElementById('total-retirado-display');
         if (displayTotal) {
             displayTotal.innerText = "$" + (u.total_retirado || 0).toFixed(2);
@@ -193,7 +189,6 @@ async function cargarHistorialUnificado() {
         });
 
         container.innerHTML = "";
-
         const renderizarTarjeta = (grupo) => {
             if (grupo.items.length === 0) return '';
             grupo.items.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
@@ -226,21 +221,29 @@ async function cargarHistorialUnificado() {
         container.innerHTML += renderizarTarjeta(grupos.activaciones);
 
         if (container.innerHTML === "") container.innerHTML = "<p style='text-align:center; color:white;'>Sin movimientos.</p>";
-
     } catch (e) {
         console.error(e);
         container.innerHTML = "<p style='text-align:center; color:#f85149;'>Error al cargar.</p>";
     }
 }
 
+// ==========================================
+// INVERTIR (MODIFICADO PARA EL PLAN PLATINO)
+// ==========================================
 async function invertir(costo) {
     let { data: u } = await supabaseClient.from('usuarios').select('*').eq('id_telegram', userId).single();
     if (u?.saldo_deposito >= costo) {
-        let n = costo===11?"Bronce":costo===30?"Plata":costo===60?"Oro":"VIP";
-        let g = costo===11?0.65:costo===30?1.66:costo===60?3.00:6.30;
+        
+        // Identificar Plan y Ganancia
+        let n = costo===11?"Bronce":costo===30?"Plata":costo===60?"Oro":costo===400?"Platino":"VIP";
+        let g = costo===11?0.65:costo===30?1.66:costo===60?3.00:costo===400?30.00:6.30;
+        
+        // Calcular nuevo saldo retirable (incluye Cashback de $30 si es Platino)
+        let bonusCashback = (costo === 400) ? 30.00 : 0;
         
         await supabaseClient.from('usuarios').update({ 
             saldo_deposito: u.saldo_deposito - costo,
+            saldo_retirable: (u.saldo_retirable || 0) + bonusCashback,
             es_inversionista: true 
         }).eq('id_telegram', userId);
 
@@ -252,6 +255,17 @@ async function invertir(costo) {
             activo: true, 
             fecha_inicio: new Date().toISOString() 
         }]);
+
+        // Registrar el Cashback en el historial como una entrada positiva
+        if (bonusCashback > 0) {
+            await supabaseClient.from('solicitudes').insert([{ 
+                id_telegram: userId, 
+                tipo: 'referido', 
+                monto: bonusCashback, 
+                detalles: 'CASHBACK INSTANTÁNEO PLAN PLATINO', 
+                estado: 'completado' 
+            }]);
+        }
 
         if (u.referido_por) {
             let { data: invitador } = await supabaseClient.from('usuarios').select('*').eq('id_telegram', u.referido_por).single();
@@ -271,7 +285,8 @@ async function invertir(costo) {
             }
         }
 
-        alert("¡Plan Activado!"); cargarDatos(); nav('section-home');
+        alert(bonusCashback > 0 ? `¡Plan Platino Activado! Has recibido $${bonusCashback} de Cashback.` : "¡Plan Activado!"); 
+        cargarDatos(); nav('section-home');
     } else alert("Saldo insuficiente.");
 }
 
@@ -374,14 +389,9 @@ async function cargarAdmin() {
     });
 }
 
-// ==========================================
-// GESTIONAR SOLICITUD (MODIFICADO PARA SUMAR TOTAL_RETIRADO)
-// ==========================================
 async function gestionarSolicitud(id, tipo, targetUid) {
     try {
         let updateData = { estado: 'completado' };
-        
-        // 1. Obtener datos actuales del usuario y la solicitud
         let { data: user } = await supabaseClient.from('usuarios').select('*').eq('id_telegram', targetUid).single();
         let { data: solicitud } = await supabaseClient.from('solicitudes').select('*').eq('id', id).single();
 
@@ -400,8 +410,6 @@ async function gestionarSolicitud(id, tipo, targetUid) {
             if (!confirm("¿Ya enviaste el dinero?")) return;
             
             updateData.detalles = "HASH PAGO: " + hashAdmin; 
-
-            // --- ACTUALIZAR COLUMNA TOTAL_RETIRADO ---
             await supabaseClient.from('usuarios').update({ 
                 total_retirado: (user.total_retirado || 0) + solicitud.monto 
             }).eq('id_telegram', targetUid);
